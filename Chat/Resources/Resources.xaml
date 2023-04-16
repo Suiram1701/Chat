@@ -3,5 +3,27 @@
                     xmlns:App="clr-namespace:Chat">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Resources/WindowChrome.xaml"/>
+        <ResourceDictionary Source="/Resources/Templates/UserTemplate.xaml"/>
     </ResourceDictionary.MergedDictionaries>
+
+    <!--#region Simple style definition -->
+    <!-- List view items arent selectable -->
+    <Style TargetType="ListViewItem" x:Key="NotFocuable">
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListViewItem">
+                    <Border x:Name="Border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="Background" Value="Transparent" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--#endregion-->
 </ResourceDictionary>

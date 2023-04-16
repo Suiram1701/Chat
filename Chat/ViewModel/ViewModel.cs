@@ -14,7 +14,7 @@ namespace Chat.ViewModel
         protected virtual void RaisePropertyChanged([CallerMemberName] string propertyName = "")
         {
             if (!string.IsNullOrEmpty(propertyName))
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
