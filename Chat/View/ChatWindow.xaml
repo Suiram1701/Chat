@@ -1,0 +1,29 @@
+﻿<Window x:Name="window" x:Class="Chat.View.ChatWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ViewModel="clr-namespace:Chat.ViewModel"
+        xmlns:local="clr-namespace:Chat.View"
+        mc:Ignorable="d"
+        Title="Chat" WindowStyle="None" Background="#FF313131"
+        Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid Background="#FF1F1F1F" MouseDown="WindowChrome_MouseDown">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition Width="60"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="{Binding Title, ElementName=window}" Foreground="White" Height="25" Grid.Column="0" Margin="10,-2.5,0,2.5"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button Click="Minimize_Click" Content="_" Style="{StaticResource WindowChrome_SizeButton}"/>
+                <Button Click="Maximize_Click" Content="☐" Style="{StaticResource WindowChrome_SizeButton}"/>
+                <Button Click="Exit_Click" Content="╳" Style="{StaticResource WindowChrome_ExitButton}"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
