@@ -1,6 +1,8 @@
 ﻿using Chat.Model;
+using Chat.View;
 using System.Collections.Generic;
 using System.Diagnostics;
+using static Localization.LangHelper;
 
 namespace Chat.ViewModel
 {
@@ -9,6 +11,33 @@ namespace Chat.ViewModel
     /// </summary>
     internal class Chat : ViewModel
     {
+        #region Localization
+        /// <summary>
+        /// Window title for this window
+        /// </summary>
+        public string L_Title => GetString("ChatWindow.Title");
+
+        /// <summary>
+        /// 'User in Chat' label
+        /// </summary>
+        public string L_Users => GetString("ChatWindow.Users");
+
+        /// <summary>
+        /// 'Chat History' label
+        /// </summary>
+        public string L_ChatHistory => GetString("ChatWindow.ChatHistory");
+
+        /// <summary>
+        /// 'Send' tooltip text
+        /// </summary>
+        public string L_Send => GetString("ChatWindow.Send");
+
+        /// <summary>
+        /// Message input placeholder
+        /// </summary>
+        public string L_Msg => GetString("ChatWindow.MsgInputPh");
+        #endregion
+
         public Chat()
         {
             // Setup commands
@@ -33,7 +62,7 @@ namespace Chat.ViewModel
         /// Place holder for message input
         /// </summary>
         public string MessageInputPlaceHolder =>
-            string.IsNullOrEmpty(MessageInput) ? "Message" : string.Empty;
+            string.IsNullOrEmpty(MessageInput) ? L_Msg : string.Empty;
 
         /// <summary>
         /// Message to send

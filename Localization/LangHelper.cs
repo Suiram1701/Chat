@@ -20,18 +20,17 @@ namespace Localization
             get => _Culture;
             set
             {
-                CultureInfo culture = _Culture;
-                _Culture = value;
-
                 // Test if culture is available
                 try
                 {
-                    _ResManager.GetString(string.Empty);
+                    _ResManager.GetString("ChatWindow.Title", value);
                 }
-                catch (MissingSatelliteAssemblyException)
+                catch
                 {
-                    _Culture = culture;
+                    return;
                 }
+
+                _Culture = value;
             }
         }
 
@@ -47,8 +46,12 @@ namespace Localization
         /// </summary>
         static LangHelper()
         {
+            // Set default lang
             _Culture = new CultureInfo("en-US");
             _ResManager = new ResourceManager("Localization.Strings", Assembly.GetExecutingAssembly());
+
+            // Try to set system lang
+            Culture = CultureInfo.InstalledUICulture;
         }
 
         /// <summary>
@@ -62,7 +65,7 @@ namespace Localization
             {
                 return _ResManager.GetString(langKey, _Culture);
             }
-            catch (MissingManifestResourceException)     // Throw when resource key not found
+            catch (MissingManifestResourceException)     // Thrown when resource key not found
             {
                 return null;
             }

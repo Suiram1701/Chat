@@ -117,4 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ChatWindow.ChatHistory" xml:space="preserve">
+    <value>Chat History:</value>
+  </data>
+  <data name="ChatWindow.MsgInputPh" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="ChatWindow.Send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="ChatWindow.Title" xml:space="preserve">
+    <value>Chat</value>
+  </data>
+  <data name="ChatWindow.Users" xml:space="preserve">
+    <value>Users in Chat:</value>
+  </data>
 </root>

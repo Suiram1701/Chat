@@ -5,19 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ViewModel="clr-namespace:Chat.ViewModel"
         xmlns:Model="clr-namespace:Chat.Model"
-        xmlns:local="clr-namespace:Chat.View"
         xmlns:Convert="clr-namespace:Chat.Resources.Convert"
         mc:Ignorable="d"
-        Title="Chat" WindowStyle="None" Background="#f4f4f4"
+        WindowStyle="None" Background="#f4f4f4"
         Height="450" Width="800"
-        MinHeight="450" MinWidth="800"
-        xmlns:System="clr-namespace:System;assembly=mscorlib">
+        MinHeight="450" MinWidth="800">
     <Window.DataContext>
         <ViewModel:Chat/>
     </Window.DataContext>
     <Window.Resources>
         <Convert:SubtractConvert x:Key="Subtract"/>
     </Window.Resources>
+    <Window.Title>
+        <Binding Path="L_Title" Mode="OneTime"/>
+    </Window.Title>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
@@ -40,8 +41,8 @@
         </Grid>
 
         <StackPanel Orientation="Horizontal" Grid.Row="1" Background="#ebebeb">
-            <Label Content="Users:" FontSize="12" Height="25" Width="200"/>
-            <Label Content="Chat history:" FontSize="12" Height="25" Width="200"/>
+            <Label Content="{Binding L_Users, Mode=OneTime}" FontSize="12" Height="25" Width="200"/>
+            <Label Content="{Binding L_ChatHistory, Mode=OneTime}" FontSize="12" Height="25" Width="200"/>
         </StackPanel>
 
         <Grid Grid.Row="2" Background="#ededed">
@@ -114,7 +115,7 @@
                 </Grid.ColumnDefinitions>
                 <Label Content="{Binding MessageInputPlaceHolder, Mode=OneWay}" Height="30" Grid.Column="0" FontSize="15" VerticalContentAlignment="Center"/>
                 <TextBox Name="MsgInput" Text="{Binding MessageInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" Height="25" FontSize="15" Grid.Column="0" VerticalContentAlignment="Center" KeyUp="MsgInput_KeyUp"/>
-                <Button x:Name="SendMsg" Height="25" Width="25" Grid.Column="1" Panel.ZIndex="10" ToolTip="Send" Command="{Binding SendCommand, Mode=OneWay}">
+                <Button x:Name="SendMsg" Height="25" Width="25" Grid.Column="1" Panel.ZIndex="10" ToolTip="{Binding L_Send, Mode=OneTime}" Command="{Binding SendCommand, Mode=OneWay}">
                     <Polyline Points="2,10 20,10 2,4 2,16 20,10" Height="20" Width="20" Stroke="Black" StrokeThickness="1"/>
                 </Button>
             </Grid>
