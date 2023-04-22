@@ -1,9 +1,6 @@
 ﻿using Chat.Model;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace Chat.ViewModel
 {
@@ -12,8 +9,53 @@ namespace Chat.ViewModel
     /// </summary>
     internal class Chat : ViewModel
     {
+        public Chat()
+        {
+            // Setup commands
+            SendCommand = new DelegateCommand(
+                parameter => !string.IsNullOrEmpty(MessageInput),
+                parameter =>
+                {
+                    MessageInput = string.Empty;
+
+                    // Send Msg
+                });
+        }
+
+        // Commands
         /// <summary>
-        /// List of users in chat
+        /// Send the message
+        /// </summary>
+        public DelegateCommand SendCommand { get; }
+
+        // Data
+        /// <summary>
+        /// Place holder for message input
+        /// </summary>
+        public string MessageInputPlaceHolder =>
+            string.IsNullOrEmpty(MessageInput) ? "Message" : string.Empty;
+
+        /// <summary>
+        /// Message to send
+        /// </summary>
+        public string MessageInput
+        {
+            get => _MessageInput;
+            set
+            {
+                if (value != MessageInput)
+                {
+                    _MessageInput = value;
+                    RaisePropertyChanged();
+                    RaisePropertyChanged(nameof(MessageInputPlaceHolder));
+                    SendCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+        private string _MessageInput = string.Empty;
+
+        /// <summary>
+        /// List of users in messages in chat
         /// </summary>
         public List<Message> Messages
         {
@@ -24,6 +66,7 @@ namespace Chat.ViewModel
                 RaisePropertyChanged();
             }
         }
+        private List<Message> _Messages = new List<Message>();
 
         /// <summary>
         /// List of users in chat
@@ -37,130 +80,6 @@ namespace Chat.ViewModel
                 RaisePropertyChanged();
             }
         }
-
-        private List<Message> _Messages = new List<Message>()
-        {
-            new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },
-            new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Heute ist ein toller tag!\nAußdem muss ich noch hausaufgabe machen :( hudehuishiuhuisfhuisfhuisfhrihuihuihhiusdhcuisdhuisfhuisdrghugirhguidfghuidfghdfuihduighuihduidhuigi"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },new Message()
-            {
-                Sender = "TESTGVG",
-                SendTime = DateTime.Now,
-                Content = "Hallo, Welt!"
-            },
-        };
-
-        private List<User> _Users = new List<User>()
-        {
-            new User()
-            {
-                Name = "TESTGVG"
-            }, new User()
-            {
-                Name = "gzugzufutd"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }, new User()
-            {
-                Name = "TEST"
-            }
-        };
+        private List<User> _Users = new List<User>();
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Chat.ViewModel;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -20,11 +21,10 @@ namespace Chat.View
     /// </summary>
     public partial class ChatWindow : Window
     { 
-        public ChatWindow()
-        {
+        public ChatWindow() =>
             InitializeComponent();
-        }
 
+        #region Window chrome
         /// <summary>
         /// On click on window chrome move window
         /// </summary>
@@ -75,5 +75,18 @@ namespace Chat.View
         /// <param name="e"></param>
         private void Exit_Click(object sender, RoutedEventArgs e) =>
             Application.Current.Shutdown();
+
+        #endregion
+
+        /// <summary>
+        /// Send message on enter
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MsgInput_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && SendMsg.Command.CanExecute(null))
+                SendMsg.Command.Execute(null);
+        }
     }
 }
