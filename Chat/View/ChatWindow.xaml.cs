@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,7 +19,7 @@ namespace Chat.View
     /// Chat window
     /// </summary>
     public partial class ChatWindow : Window
-    {
+    { 
         public ChatWindow()
         {
             InitializeComponent();

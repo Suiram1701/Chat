@@ -4,16 +4,24 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ViewModel="clr-namespace:Chat.ViewModel"
+        xmlns:Model="clr-namespace:Chat.Model"
         xmlns:local="clr-namespace:Chat.View"
+        xmlns:Convert="clr-namespace:Chat.Resources.Convert"
         mc:Ignorable="d"
-        Title="Chat" WindowStyle="None" Background="#313131"
-        Height="450" Width="800">
+        Title="Chat" WindowStyle="None" Background="#292929"
+        Height="450" Width="800"
+        MinHeight="450" MinWidth="800"
+        xmlns:System="clr-namespace:System;assembly=mscorlib">
     <Window.DataContext>
         <ViewModel:Chat/>
     </Window.DataContext>
+    <Window.Resources>
+        <Convert:SubtractConvert x:Key="Subtract"/>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
+            <RowDefinition Height="25"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
@@ -30,20 +38,71 @@
                 <Button Click="Exit_Click" Content="╳" Style="{StaticResource WindowChrome_ExitButton}"/>
             </StackPanel>
         </Grid>
+        <StackPanel Orientation="Horizontal" Grid.Row="1">
+            <Label Content="Users:" Foreground="White" FontSize="12" Height="25" Width="200"/>
+            <Label Content="Chat history:" Foreground="White" FontSize="12" Height="25" Width="200"/>
+        </StackPanel>
         
-        <Grid Grid.Row="1">
+        <Grid Grid.Row="2" Background="#313131">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="25"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <!-- User list -->
-            <ListView Background="#272727" BorderThickness="0" Grid.Row="1"
-                      ItemsSource="{Binding Users, Mode=OneWay}" ItemTemplate="{StaticResource ResourceKey=UserTemplate}" SelectionMode="Single" ItemContainerStyle="{StaticResource NotFocuable}"/>
+            <ListView Background="#272727" BorderThickness="0" Grid.Row="0" Grid.Column="0"
+                      ItemsSource="{Binding Users, Mode=OneWay}" ItemContainerStyle="{StaticResource NotFocuable}">
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="Model:User">
+                        <Grid Name="Grid" Height="40" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType={x:Type ListView}}, Converter={StaticResource ResourceKey=Subtract}, ConverterParameter=35}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Name="Border" Background="Transparent" CornerRadius="3" Grid.ColumnSpan="2"/>
+                            <Label Content="{Binding Name}" Foreground="LightGray" Height="30" Width="180" Grid.Column="1" FontSize="13" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsMouseOver, ElementName=Grid}" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="#5a5a5a"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            
+            <!-- Messages -->
+            <ListView Name="MsgList" Background="#313131" BorderThickness="0" Grid.Row="0" Grid.Column="1"
+                      ItemsSource="{Binding Messages, Mode=OneWay}" ItemContainerStyle="{StaticResource NotFocuable}">
+                <ListView.ItemTemplate>
+                    <DataTemplate DataType="{x:Type Model:Message}">
+                        <Grid Name="Grid" Height="auto" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType={x:Type ListView}}, Converter={StaticResource ResourceKey=Subtract}, ConverterParameter=35}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="50"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="15"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="10"/>
+                            </Grid.RowDefinitions>
+                            <Border Name="Border" Background="Transparent" CornerRadius="3" Grid.ColumnSpan="3" Grid.RowSpan="2"/>
+                            <Label Content="{Binding Sender}" Foreground="LightGray" Height="20" Width="190" Grid.Column="1" Grid.Row="0" FontSize="8" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Label Content="{Binding SendTime, StringFormat=\{0:f\}}" Grid.Row="0" Grid.Column="2" Height="20" Width="auto" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="8" Foreground="LightGray"/>
+                            <TextBlock x:Name="Content" Text="{Binding Content}" TextWrapping="Wrap" TextAlignment="Left" Foreground="LightGray" Height="auto" Width="{Binding Width, ElementName=Grid, Converter={StaticResource ResourceKey=Subtract}, ConverterParameter=15}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding IsMouseOver, ElementName=Grid}" Value="true">
+                                <Setter TargetName="Border" Property="Background" Value="#5a5a5a"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
         </Grid>
     </Grid>
 </Window>
