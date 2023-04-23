@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Chat.View"
-        xmlns:Validation="clr-namespace:Chat.ValidationRules"
         xmlns:ViewModel="clr-namespace:Chat.ViewModel"
         mc:Ignorable="d"
         Title="Menu" Height="450" Width="500" ResizeMode="NoResize">
@@ -14,19 +13,36 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
+            <RowDefinition Height="30"/>
             <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="50"/>
+        </Grid.ColumnDefinitions>
+
         <!-- Nickname input -->
-        <Label Content="" FontSize="25" Grid.Row="1" Margin="50,0,0,0"/>
-        <TextBox Background="Transparent" FontSize="25" Height="40" Width="400" Grid.Row="1" Style="{StaticResource ValidationRuleErrorShowing}">
-            <TextBox.Text>
-                <Binding Path="Nickname" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
-                    <Binding.ValidationRules>
-                        <Validation:NormalTextRule/>
-                    </Binding.ValidationRules>
-                </Binding>
-            </TextBox.Text>
+        <Label Content="Display Name:" FontSize="15" Grid.Row="1" Grid.Column="1"/>
+        <TextBox Text="{Binding Nickname, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" FontSize="25" Height="40" Grid.Row="2" Grid.Column="1">
+            <TextBox.ToolTip>
+                <TextBlock Text="{Binding Error[Nickname]}" Foreground="Red" FontSize="12"/>
+            </TextBox.ToolTip>
         </TextBox>
+        <Label Content="{Binding LettersLeft, Mode=OneWay}"  FontSize="12" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" Margin="0,40,0,-16"/>
+
+        <!-- Chat start -->
+        <Button Content="Start chat" Command="{Binding StartChatCommand, Mode=OneWay}" FontSize="20" Grid.Row="4" Grid.Column="1" Margin="50,0,50,0"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="5" Grid.Column="1" Margin="50,4,0,-4">
+            <StackPanel Orientation="Vertical">
+                <Button Content="Load saved chat history" Command="{Binding LoadChatHistoryCommand, Mode=OneWay}" Padding="5,0,5,0" Height="20"/>
+                <Button Content="New chat history" Command="{Binding NewHistoryCommad, Mode=OneWay}" Padding="5,0,5,0" Height="20"/>
+            </StackPanel>
+            <Label Content="Chat:" Margin="10,0,0,0" VerticalAlignment="Center"/>
+            <Label Content="{Binding SelectedFileView, Mode=OneWay}" VerticalAlignment="Center"/>
+        </StackPanel>
     </Grid>
 </Window>
