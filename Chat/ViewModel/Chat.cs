@@ -9,7 +9,7 @@ namespace Chat.ViewModel
     /// <summary>
     /// Viewmodel for Chat window
     /// </summary>
-    internal class Chat : ViewModel
+    internal class Chat : ViewModelBase
     {
         #region Localization
         /// <summary>

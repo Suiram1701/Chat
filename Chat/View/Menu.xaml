@@ -1,0 +1,32 @@
+﻿<Window x:Class="Chat.View.Menu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Chat.View"
+        xmlns:Validation="clr-namespace:Chat.ValidationRules"
+        xmlns:ViewModel="clr-namespace:Chat.ViewModel"
+        mc:Ignorable="d"
+        Title="Menu" Height="450" Width="500" ResizeMode="NoResize">
+    <Window.DataContext>
+        <ViewModel:Menu/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Nickname input -->
+        <Label Content="" FontSize="25" Grid.Row="1" Margin="50,0,0,0"/>
+        <TextBox Background="Transparent" FontSize="25" Height="40" Width="400" Grid.Row="1" Style="{StaticResource ValidationRuleErrorShowing}">
+            <TextBox.Text>
+                <Binding Path="Nickname" Mode="TwoWay" UpdateSourceTrigger="PropertyChanged">
+                    <Binding.ValidationRules>
+                        <Validation:NormalTextRule/>
+                    </Binding.ValidationRules>
+                </Binding>
+            </TextBox.Text>
+        </TextBox>
+    </Grid>
+</Window>

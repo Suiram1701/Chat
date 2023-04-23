@@ -61,12 +61,17 @@
     </Compile>
     <Compile Include="Model\User.cs" />
     <Compile Include="Resources\Convert\SubtractConvert.cs" />
+    <Compile Include="ValidationRules\NormalTextRule.cs" />
     <Compile Include="ViewModel\Chat.cs" />
     <Compile Include="ViewModel\DelegateCommand.cs" />
     <Compile Include="Model\Message.cs" />
-    <Compile Include="ViewModel\ViewModel.cs" />
+    <Compile Include="ViewModel\Menu.cs" />
+    <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="View\ChatWindow.xaml.cs">
       <DependentUpon>ChatWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Menu.xaml.cs">
+      <DependentUpon>Menu.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -91,11 +96,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Resources\ValidationRuleErrorShowing.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Resources\WindowChrome.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\ChatWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Menu.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

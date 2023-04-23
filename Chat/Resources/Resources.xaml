@@ -4,6 +4,7 @@
                     xmlns:Convert="clr-namespace:Chat.Resources.Convert">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/Resources/WindowChrome.xaml"/>
+        <ResourceDictionary Source="/Resources/ValidationRuleErrorShowing.xaml"/>
     </ResourceDictionary.MergedDictionaries>
 
     <!--#region Simple style definition -->
