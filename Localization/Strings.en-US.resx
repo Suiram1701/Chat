@@ -117,6 +117,18 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="App.NetConErr" xml:space="preserve">
+    <value>Network connection error!</value>
+  </data>
+  <data name="App.NetConTimeoutErr" xml:space="preserve">
+    <value>Your network ping is with {0}ms (maximum are {1}ms) too high for using this chat!</value>
+  </data>
+  <data name="App.NoNetConErr" xml:space="preserve">
+    <value>You need a network connection to use this chat!</value>
+  </data>
+  <data name="App.OtherNetErr" xml:space="preserve">
+    <value>A {0} error has occurred!</value>
+  </data>
   <data name="ChatWindow.ChatHistory" xml:space="preserve">
     <value>Chat History:</value>
   </data>

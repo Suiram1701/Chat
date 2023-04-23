@@ -67,7 +67,7 @@ namespace Localization
             }
             catch (MissingManifestResourceException)     // Thrown when resource key not found
             {
-                return null;
+                return langKey;
             }
         }
 
