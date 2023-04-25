@@ -2,6 +2,7 @@
 using Microsoft.Win32;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows;
@@ -18,7 +19,7 @@ namespace Chat.ViewModel
         public Menu()
         {
             // Init commands
-            StartChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)), parameter =>
+            StartChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)) && !HasError(nameof(Password)), parameter =>
             {
                 //TODO: Start new chat
             });
@@ -49,7 +50,12 @@ namespace Chat.ViewModel
                 }
             });
 
-            NewHistoryCommad = new DelegateCommand(parameter => !string.IsNullOrEmpty(SelectedFile), parameter => SelectedFile = string.Empty);
+            NewHistoryCommand = new DelegateCommand(parameter => !string.IsNullOrEmpty(SelectedFile), parameter => SelectedFile = string.Empty);
+
+            JoinChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)) && !HasError(nameof(Password)) && !HasError(nameof(JoinIP)), parameter =>
+            {
+                //TODO: Join chat
+            });
         }
 
         // Commands
@@ -63,9 +69,20 @@ namespace Chat.ViewModel
         /// </summary>
         public DelegateCommand LoadChatHistoryCommand { get; }
 
-        public DelegateCommand NewHistoryCommad { get; }
+        /// <summary>
+        /// clear chat history field
+        /// </summary>
+        public DelegateCommand NewHistoryCommand { get; }
+
+        /// <summary>
+        /// Join the given chat
+        /// </summary>
+        public DelegateCommand JoinChatCommand { get; }
 
         // Data
+        /// <summary>
+        /// The viewing of the selected file
+        /// </summary>
         public string SelectedFileView =>
             !string.IsNullOrEmpty(SelectedFile) ? SelectedFile.Substring(SelectedFile.LastIndexOf('\\') + 1) : "New Chat";
 
@@ -74,6 +91,79 @@ namespace Chat.ViewModel
         /// </summary>
         public string LettersLeft =>
             "Letters left: " + (20 - Nickname.Length > 0 ? 20 - Nickname.Length : 0);
+
+        public string JoinIP
+        {
+            get => _JoinIP;
+            set
+            {
+                if (value != _JoinIP)
+                {
+                    // Validate
+                    ClearErrors();
+                    if (!IPAddress.TryParse(value, out _))
+                        AddError("Invalid IP address!");
+                    RaiseErrorsChanged();
+
+                    _JoinIP = value;
+                    RaisePropertyChanged();
+                    JoinChatCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+        private string _JoinIP = string.Empty;
+
+        /// <summary>
+        /// The password to join or create a chat
+        /// </summary>
+        public string Password
+        {
+            get => _Password;
+            set
+            {
+                if (value != _Password)
+                {
+                    #region Validation
+                    ClearErrors();
+
+                    if (value.Length < 8)
+                        AddError("Password need at least 8 letters!");
+
+                    if (value.Length > 100)
+                        AddError("Maximum letters reached! (Maximum 100)");
+
+                    if (value.Contains(" "))
+                        AddError("Mustn't contain spaces!");
+
+                    if (string.IsNullOrEmpty(value))
+                        AddError("Field cannot be empty!");
+
+                    // Check for invalid letters
+                    StringBuilder sb = new StringBuilder();
+                    foreach (char c in value)
+                        if (!char.IsLetterOrDigit(c) && c != ' ')
+                            if (!sb.ToString().Contains(c.ToString()))
+                                sb.Append($"{c}, ");
+                    if (sb.Length > 0)
+                    {
+                        sb.Remove(sb.Length - 2, 2);
+                        if (sb.Length == 1)
+                            AddError(sb.ToString() + " isn't a valid letter!");
+                        else
+                            AddError(sb.ToString() + " aren't a valid letters!");
+                    }
+
+                    RaiseErrorsChanged();
+                    #endregion
+
+                    _Password = value;
+                    RaisePropertyChanged();
+                    StartChatCommand.RaiseCanExecuteChanged();
+                    JoinChatCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+        private string _Password = "Password";
 
         public string SelectedFile
         {
@@ -85,7 +175,7 @@ namespace Chat.ViewModel
                     _SelectedFile = value;
                     RaisePropertyChanged();
                     RaisePropertyChanged(nameof(SelectedFileView));
-                    NewHistoryCommad.RaiseCanExecuteChanged();
+                    NewHistoryCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -135,6 +225,7 @@ namespace Chat.ViewModel
                     RaisePropertyChanged();
                     RaisePropertyChanged(nameof(LettersLeft));
                     StartChatCommand.RaiseCanExecuteChanged();
+                    JoinChatCommand.RaiseCanExecuteChanged();
                 }
             }
         }
