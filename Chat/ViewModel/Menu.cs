@@ -1,20 +1,37 @@
 ﻿using Localization;
 using Microsoft.Win32;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Security.Cryptography;
+using System.Security.RightsManagement;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using static Chat.Properties.Settings;
 
 namespace Chat.ViewModel
 {
     internal class Menu : ViewModelBase
     {
-        // Localization
-
+        #region Localization
+        public string L_Title =>
+            LangHelper.GetString("MenuWindow.Title");
+        public string L_NiNameInput =>
+            LangHelper.GetString("MenuWindow.NiNameInput");
+        public string L_PasswdInput =>
+            LangHelper.GetString("MenuWindow.PasswdInput");
+        public string L_SChat =>
+            LangHelper.GetString("MenuWindow.SChat");
+        public string L_NChat =>
+            LangHelper.GetString("MenuWindow.NChat");
+        public string L_NChath =>
+            LangHelper.GetString("MenuWindow.NChath");
+        public string L_LoadsChath =>
+            LangHelper.GetString("MenuWindow.LoadsChath");
+        public string L_JChat =>
+            LangHelper.GetString("MenuWindow.JChat");
+        public string L_JChatBtn =>
+            LangHelper.GetString("MenuWindow.JChatBtn");
+        public string L_IPadJoin =>
+            LangHelper.GetString("MenuWindow.IPadJoin");
+        #endregion
 
         public Menu()
         {
@@ -84,14 +101,17 @@ namespace Chat.ViewModel
         /// The viewing of the selected file
         /// </summary>
         public string SelectedFileView =>
-            !string.IsNullOrEmpty(SelectedFile) ? SelectedFile.Substring(SelectedFile.LastIndexOf('\\') + 1) : "New Chat";
+            !string.IsNullOrEmpty(SelectedFile) ? SelectedFile.Substring(SelectedFile.LastIndexOf('\\') + 1) : L_NChat;
 
         /// <summary>
         /// Letters left in nickname input box
         /// </summary>
         public string LettersLeft =>
-            "Letters left: " + (20 - Nickname.Length > 0 ? 20 - Nickname.Length : 0);
+            LangHelper.GetString("MenuWindow.ValiErr.LF", (20 - Nickname.Length > 0 ? 20 - Nickname.Length : 0).ToString());
 
+        /// <summary>
+        /// IP to join in chat
+        /// </summary>
         public string JoinIP
         {
             get => _JoinIP;
@@ -99,11 +119,16 @@ namespace Chat.ViewModel
             {
                 if (value != _JoinIP)
                 {
-                    // Validate
+                    #region Validate
                     ClearErrors();
                     if (!IPAddress.TryParse(value, out _))
-                        AddError("Invalid IP address!");
+                        AddError(LangHelper.GetString("MenuWindow.ValiErr.JIPInv"));
+
+                    if (value == App.OwnIP.ToString())
+                        AddError(LangHelper.GetString("MenuWindow.ValiErr.JIPOwn"));
+
                     RaiseErrorsChanged();
+                    #endregion
 
                     _JoinIP = value;
                     RaisePropertyChanged();
@@ -127,16 +152,16 @@ namespace Chat.ViewModel
                     ClearErrors();
 
                     if (value.Length < 8)
-                        AddError("Password need at least 8 letters!");
+                        AddError(LangHelper.GetString("MenuWindow.ValiErr.PasswdMin"));
 
                     if (value.Length > 100)
-                        AddError("Maximum letters reached! (Maximum 100)");
+                        AddError(LangHelper.GetString("MenuWindow.ValiErr.MaxLet"));
 
                     if (value.Contains(" "))
-                        AddError("Mustn't contain spaces!");
+                        AddError(LangHelper.GetString("MenuWindow.ValiErr.NoSpaces"));
 
                     if (string.IsNullOrEmpty(value))
-                        AddError("Field cannot be empty!");
+                        AddError(LangHelper.GetString("MenuWindow.ValiErr.NContent"));
 
                     // Check for invalid letters
                     StringBuilder sb = new StringBuilder();
@@ -148,9 +173,9 @@ namespace Chat.ViewModel
                     {
                         sb.Remove(sb.Length - 2, 2);
                         if (sb.Length == 1)
-                            AddError(sb.ToString() + " isn't a valid letter!");
+                            AddError(LangHelper.GetString("MenuWindow.ValiErr.FLetter", sb.ToString()));
                         else
-                            AddError(sb.ToString() + " aren't a valid letters!");
+                            AddError(LangHelper.GetString("MenuWindow.ValiErr.FLetters", sb.ToString()));
                     }
 
                     RaiseErrorsChanged();
@@ -195,13 +220,13 @@ namespace Chat.ViewModel
                     ClearErrors();
 
                     if (value.Length > 20)
-                        AddError("Maximum letters reached!");
+                        AddError(LangHelper.GetString("MenuWindow.ValiErr.MaxLetR"));
 
                     if (value.Contains(" "))
-                        AddError("Mustn't contain spaces!");
+                        AddError(LangHelper.GetString("MenuWindow.ValiErr.NoSpaces"));
 
                     if (string.IsNullOrEmpty(value))
-                        AddError("Field cannot be empty!");
+                        AddError(LangHelper.GetString("MenuWindow.ValiErr.NContent"));
 
                     // Check for invalid letters
                     StringBuilder sb = new StringBuilder();
@@ -213,9 +238,9 @@ namespace Chat.ViewModel
                     {
                         sb.Remove(sb.Length - 2, 2);
                         if (sb.Length == 1)
-                            AddError(sb.ToString() + " isn't a valid letter!");
+                            AddError(LangHelper.GetString("MenuWindow.ValiErr.FLetter", sb.ToString()));
                         else
-                            AddError(sb.ToString() + " aren't a valid letters!");
+                            AddError(LangHelper.GetString("MenuWindow.ValiErr.FLetters", sb.ToString()));
                     }
 
                     RaiseErrorsChanged();

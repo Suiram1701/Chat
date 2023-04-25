@@ -4,11 +4,15 @@ using System.Security.Principal;
 using System.Net.NetworkInformation;
 using System.Net;
 using Localization;
+using System.Net.Sockets;
+using System.Linq;
 
 namespace Chat
 {
     public partial class App : Application
     {
+        public static IPAddress OwnIP;
+
         protected override async void OnStartup(StartupEventArgs e)
         {
             // If not nickname set current username
@@ -17,6 +21,17 @@ namespace Chat
                 string name = WindowsIdentity.GetCurrent().Name;
                 Default.Username = name.Substring(name.LastIndexOf('\\') + 1);
                 Default.Save();
+            }
+
+            // Get own ip
+            try
+            {
+                IPAddress ownIP = Dns.GetHostEntry(Dns.GetHostName()).AddressList
+                    .FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+                OwnIP = ownIP;
+            }
+            catch
+            {
             }
 
             // Check network connection

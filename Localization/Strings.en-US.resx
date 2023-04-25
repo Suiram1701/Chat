@@ -144,4 +144,64 @@
   <data name="ChatWindow.Users" xml:space="preserve">
     <value>Users in Chat:</value>
   </data>
+  <data name="MenuWindow.IPadJoin" xml:space="preserve">
+    <value>IP address to join:</value>
+  </data>
+  <data name="MenuWindow.JChat" xml:space="preserve">
+    <value>Join a Chat</value>
+  </data>
+  <data name="MenuWindow.JChatBtn" xml:space="preserve">
+    <value>Join Chat</value>
+  </data>
+  <data name="MenuWindow.LoadsChath" xml:space="preserve">
+    <value>Load saved Chat history</value>
+  </data>
+  <data name="MenuWindow.NChat" xml:space="preserve">
+    <value>New Chat</value>
+  </data>
+  <data name="MenuWindow.NChath" xml:space="preserve">
+    <value>New Chat history</value>
+  </data>
+  <data name="MenuWindow.NiNameInput" xml:space="preserve">
+    <value>Display Name:</value>
+  </data>
+  <data name="MenuWindow.PasswdInput" xml:space="preserve">
+    <value>Password:</value>
+  </data>
+  <data name="MenuWindow.SChat" xml:space="preserve">
+    <value>Start Chat:</value>
+  </data>
+  <data name="MenuWindow.Title" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="MenuWindow.ValiErr.FLetter" xml:space="preserve">
+    <value>{0} isn't a valid letter!</value>
+  </data>
+  <data name="MenuWindow.ValiErr.FLetters" xml:space="preserve">
+    <value>{0} aren't valid letters!</value>
+  </data>
+  <data name="MenuWindow.ValiErr.JIPInv" xml:space="preserve">
+    <value>Invalid IP address!</value>
+  </data>
+  <data name="MenuWindow.ValiErr.JIPOwn" xml:space="preserve">
+    <value>You can't use your own IP address!</value>
+  </data>
+  <data name="MenuWindow.ValiErr.LF" xml:space="preserve">
+    <value>Letters Left: {0}</value>
+  </data>
+  <data name="MenuWindow.ValiErr.MaxLet" xml:space="preserve">
+    <value>Maximum letters reached! (Maximum 100)</value>
+  </data>
+  <data name="MenuWindow.ValiErr.MaxLetR" xml:space="preserve">
+    <value>Maximum letters reached!</value>
+  </data>
+  <data name="MenuWindow.ValiErr.NContent" xml:space="preserve">
+    <value>Field cannot be empty!</value>
+  </data>
+  <data name="MenuWindow.ValiErr.NoSpaces" xml:space="preserve">
+    <value>Must not contain spaces!</value>
+  </data>
+  <data name="MenuWindow.ValiErr.PasswdMin" xml:space="preserve">
+    <value>The password need at least 8 letters!</value>
+  </data>
 </root>
