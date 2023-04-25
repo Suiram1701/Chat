@@ -6,15 +6,28 @@ using System.Net;
 using Localization;
 using System.Net.Sockets;
 using System.Linq;
+using System.Threading;
+using System.Diagnostics;
 
 namespace Chat
 {
     public partial class App : Application
     {
+        /// <summary>
+        /// IP of the running pc
+        /// </summary>
         public static IPAddress OwnIP;
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+            // Check if app is already running
+            Process ownProcess = Process.GetCurrentProcess();
+            if (Process.GetProcessesByName(ownProcess.ProcessName).Cast<Process>().Count() > 1)
+            {
+                MessageBox.Show(LangHelper.GetString("App.RunErr"), LangHelper.GetString("App.RunErrTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                Shutdown();
+            }
+
             // If not nickname set current username
             if (string.IsNullOrEmpty(Default.Username))
             {

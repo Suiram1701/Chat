@@ -129,6 +129,12 @@
   <data name="App.OtherNetErr" xml:space="preserve">
     <value>A {0} error has occurred!</value>
   </data>
+  <data name="App.RunErr" xml:space="preserve">
+    <value>The application is already running. You can't start this application a secound time.</value>
+  </data>
+  <data name="App.RunErrTitle" xml:space="preserve">
+    <value>Application is already running!</value>
+  </data>
   <data name="ChatWindow.ChatHistory" xml:space="preserve">
     <value>Chat History:</value>
   </data>
