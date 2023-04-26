@@ -8,11 +8,22 @@ using System.Linq;
 using System.Diagnostics;
 using System;
 using System.Text.RegularExpressions;
+using Chat.Commuication;
 
 namespace Chat
 {
     public partial class App : Application
     {
+        /// <summary>
+        /// Is the current pc host or not
+        /// </summary>
+        public static bool IsHost;
+
+        /// <summary>
+        /// Your nickname
+        /// </summary>
+        public static string Nickname;
+
         /// <summary>
         /// IP of the running pc
         /// </summary>
@@ -98,6 +109,9 @@ namespace Chat
 
         protected override void OnExit(ExitEventArgs e)
         {
+            // End all connections
+            Com.EndAll();
+
             base.OnExit(e);
         }
     }

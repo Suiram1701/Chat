@@ -43,5 +43,14 @@ namespace Chat.Properties {
                 return ((int)(this["MaxPing"]));
             }
         }
+        
+        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("21370")]
+        public int DefaultPort {
+            get {
+                return ((int)(this["DefaultPort"]));
+            }
+        }
     }
 }
