@@ -4,10 +4,10 @@ using System.Security.Principal;
 using System.Net.NetworkInformation;
 using System.Net;
 using Localization;
-using System.Net.Sockets;
 using System.Linq;
-using System.Threading;
 using System.Diagnostics;
+using System;
+using System.Text.RegularExpressions;
 
 namespace Chat
 {
@@ -36,17 +36,6 @@ namespace Chat
                 Default.Save();
             }
 
-            // Get own ip
-            try
-            {
-                IPAddress ownIP = Dns.GetHostEntry(Dns.GetHostName()).AddressList
-                    .FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork);
-                OwnIP = ownIP;
-            }
-            catch
-            {
-            }
-
             // Check network connection
             int MaxPing = Default.MaxPing;
             using (Ping ping = new Ping())
@@ -73,6 +62,34 @@ namespace Chat
                 {
                     ping.Dispose();
                     Shutdown();
+                }
+            }
+
+            // Get own ip
+            using (WebClient client = new WebClient())
+            {
+                try
+                {
+                    string data = await client.DownloadStringTaskAsync("http://checkip.dyndns.org");
+                    string ipString = Regex.Match(data, @"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}").Value;
+                    if (!IPAddress.TryParse(ipString, out IPAddress ip))
+                        throw new InvalidCastException(ipString);
+
+                    OwnIP = ip;
+                }
+                catch (WebException ex)     // Error while connecting to website
+                {
+                    client.Dispose();
+                    MessageBox.Show(LangHelper.GetString("App.PIPErr") + $" Details: {ex.Status}, {ex.Response}", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
+                    Shutdown();
+                    return;
+                }
+                catch (InvalidCastException ex)
+                {
+                    client.Dispose();
+                    MessageBox.Show(LangHelper.GetString("App.InvIPErr") + $": {ex.Message}", LangHelper.GetString("App.InvIPErr") + "!", MessageBoxButton.OK, MessageBoxImage.Error);
+                    Shutdown();
+                    return;
                 }
             }
 
