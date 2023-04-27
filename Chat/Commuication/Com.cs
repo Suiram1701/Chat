@@ -11,20 +11,14 @@ using static Chat.Properties.Settings;
 using static Chat.Model.Message;
 using Chat.Model;
 using Chat.Extensions;
-using System.Threading;
-using System.Runtime.Remoting.Messaging;
 using System.IO;
 using System.Xml.Serialization;
-using System.Windows.Navigation;
 
 namespace Chat.Commuication
 {
     internal static class Com
     {
-        /// <summary>
-        /// Token source to trigger end all async message treads
-        /// </summary>
-        public static CancellationTokenSource Cts { get; set; }
+        private static readonly int _BufferSize = 1024;
 
         /// <summary>
         /// Own connection for client and listen connection for host
@@ -34,7 +28,7 @@ namespace Chat.Commuication
         /// <summary>
         /// All clients that are connected with host
         /// </summary>
-        public static Dictionary<string, Socket> Clients { get; private set; }
+        public static Dictionary<string, (Socket connection, byte[] buffer)> Clients { get; private set; }
 
         /// <summary>
         /// Invoked when a message sended
@@ -52,46 +46,80 @@ namespace Chat.Commuication
         /// <param name="address">Address to join</param>
         public static void InitClient(IPAddress address, string nickname, string password)
         {
-            // Setup
-            Cts = new CancellationTokenSource();
             IPEndPoint endPoint = new IPEndPoint(address, Default.DefaultPort);
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
             // Add send event handler
-            MessageSendEventHandler += (_, e) => Connection.Send(new Message()
+            MessageSendEventHandler += (_, e) =>
             {
-                Sender = e.Sender,
-                SendTime = e.SendTime,
-                Subject = e.Subject,
-                Content = e.Message
-            }.SerializeToByteArray());
+                byte[] buffer = new Message()
+                {
+                    Sender = e.Sender,
+                    SendTime = e.SendTime,
+                    Subject = e.Subject,
+                    Content = e.Message
+                }.SerializeToByteArray();
+                Connection?.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback((ar) => Connection?.EndSend(ar)), (nickname, Connection));
+            };
 
             // Connect
             Connection.BeginConnect(endPoint, new AsyncCallback(ar =>
             {
-                // Item1 = access granted or denied; Item2 = deny reason
-                Tuple<bool, string, Socket> resonse = ar.AsyncState as Tuple<bool, string, Socket> ?? throw new ArgumentNullException(nameof(ar.AsyncState));
                 Connection.EndConnect(ar);
-
-                if (!resonse.Item1)
-                {
-                    EndAll();
-                    MessageBox.Show($"Access denied! {resonse.Item2}", "Access denied", MessageBoxButton.OK, MessageBoxImage.Warning);
-                }
-                else
-                    MessageSendEventHandler?.Invoke(null, new MessageEventArgs(nickname, DateTime.Now, Subject.Join, null));
+                MessageSendEventHandler?.Invoke(null, new MessageEventArgs(nickname, DateTime.Now, Subject.Join, null));
             }), (nickname, password, Connection));
 
             // Add reciving
-            Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsync), Connection);
+            Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
         }
 
         /// <summary>
         /// Initalize the connections for host
         /// </summary>
-        public static void InitHost()
+        public static void InitHost(string nickname, string password)
         {
+            IPEndPoint endPoint = new IPEndPoint(App.OwnIP, Default.DefaultPort);
+            Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            Connection.Bind(endPoint);
+            Connection.Listen(10);
 
+            // Setup connection accepting
+            Connection.BeginAccept(new AsyncCallback(ar =>
+            {
+                // Setup connection
+                Tuple<string, string, Socket> request = ar.AsyncState as Tuple<string, string, Socket> ?? throw new ArgumentNullException(nameof(ar.AsyncState));
+                Socket socket = Connection.EndAccept(ar);
+
+                if (request.Item2 == password)
+                {
+                    Clients.Add(request.Item1, (socket, new byte[_BufferSize]));
+
+                    // Setup sending
+                    MessageSendEventHandler += (_, e) =>
+                    {
+                        socket.Send(new Message()
+                        {
+                            Sender = e.Sender,
+                            SendTime = e.SendTime,
+                            Subject = e.Subject,
+                            Content = e.Message,
+                        }.SerializeToByteArray());
+                    };
+
+                    // Setup receiving
+                    socket.BeginReceive(Clients[request.Item1].buffer, 0, Clients[request.Item1].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
+                }
+                else
+                {
+                    socket.Send(new Message()
+                    {
+                        Sender = nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Kick,
+                        Content = null
+                    }.SerializeToByteArray());
+                }
+            }), Connection);
         }
 
         /// <summary>
@@ -99,22 +127,35 @@ namespace Chat.Commuication
         /// </summary>
         public static void EndAll()
         {
-            Cts.Cancel();
-
             Connection?.Shutdown(SocketShutdown.Both);
             Connection?.Disconnect(false);
             Connection?.Close();
             Connection = null;
+
+            foreach ((Socket socket, _) in Clients.Values)
+            {
+                socket.Send(new Message()
+                {
+                    Sender = App.Nickname,
+                    SendTime = DateTime.Now,
+                    Subject = Subject.Kick,
+                    Content = "The has been host shutdown the server!",
+                }.SerializeToByteArray());
+                socket?.Shutdown(SocketShutdown.Both);
+                socket?.Disconnect(false);
+                socket?.Close();
+            }
+            Clients.Clear();
         }
 
         #region Receiving
-        private static byte[] _Receivebuffer = new byte[1024];
+        private static byte[] _Receivebuffer = new byte[_BufferSize];
 
         /// <summary>
-        /// Handle 'BeginReceive'
+        /// Handle 'BeginReceive' for client
         /// </summary>
         /// <param name="ar"></param>
-        private static void ReceivingAsync(IAsyncResult ar)
+        private static void ReceivingAsyncClient(IAsyncResult ar)
         {
             int bytes = Connection.EndReceive(ar);
 
@@ -162,7 +203,66 @@ namespace Chat.Commuication
             }
 
             End:
-            Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsync), Connection);
+            Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
+        }
+
+        /// <summary>
+        /// Handle receiving as host
+        /// </summary>
+        /// <param name="ar"></param>
+        private static void ReceivingAsyncHost(IAsyncResult ar)
+        {
+            int bytes = Connection.EndReceive(ar);
+            string sender = (ar.AsyncState as (string, Socket)?)?.Item1;
+
+            if (bytes <= 0)
+                goto End;
+
+            using (MemoryStream stream = new MemoryStream(Clients[sender].buffer))
+            {
+                // Decode message
+                XmlSerializer serializer = new XmlSerializer(typeof(Message));
+                Message message;
+
+                try
+                {
+                    message = (Message)serializer.Deserialize(stream);
+                }
+                catch (Exception ex)
+                {
+                    Task.Run(() => MessageBox.Show(ex.Message, "Something went wrong during receiving!", MessageBoxButton.OK, MessageBoxImage.Error));
+                    stream.Dispose();
+                    goto End;
+                }
+
+                // Interpret message
+                switch (message.Subject)
+                {
+                    case Subject.Leave:
+                        Socket con = Clients[message.Sender].connection;
+                        con.Shutdown(SocketShutdown.Both);
+                        con.Disconnect(false);
+                        con.Close();
+                        Clients.Remove(message.Sender);
+                        MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        MessageSendEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        break;
+                    case Subject.Msg:
+                    case Subject.Join:
+                        MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        MessageSendEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        break;
+                    case Subject.Sync:
+                        if (App.IsHost)
+                            break;     //TODO: Syncronize
+                        break;
+                    case Subject.Kick:
+                        break;
+                }
+            }
+
+        End:
+            Clients[sender].connection?.BeginReceive(Clients[sender].buffer, 0, Clients[sender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
         }
         #endregion
     }
