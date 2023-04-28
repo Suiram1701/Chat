@@ -21,6 +21,11 @@ namespace Chat.Commuication
         private static readonly int _BufferSize = 1024;
 
         /// <summary>
+        /// Local ip end point binding for host
+        /// </summary>
+        public static Socket LocalConnection { get; private set; }
+
+        /// <summary>
         /// Own connection for client and listen connection for host
         /// </summary>
         public static Socket Connection { get; private set; }
@@ -59,7 +64,7 @@ namespace Chat.Commuication
                     Subject = e.Subject,
                     Content = e.Message
                 }.SerializeToByteArray();
-                Connection?.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback((ar) => Connection?.EndSend(ar)), (nickname, Connection));
+                Connection?.Send(buffer, 0, buffer.Length, SocketFlags.None);
             };
 
             // Connect
@@ -76,50 +81,81 @@ namespace Chat.Commuication
         /// <summary>
         /// Initalize the connections for host
         /// </summary>
-        public static void InitHost(string nickname, string password)
+        public static void InitHost()
         {
+            // Setup public ip bind
             IPEndPoint endPoint = new IPEndPoint(App.OwnIP, Default.DefaultPort);
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
             Connection.Bind(endPoint);
             Connection.Listen(10);
+            Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection);
 
-            // Setup connection accepting
-            Connection.BeginAccept(new AsyncCallback(ar =>
+            // Setup local ip bind
+            IPEndPoint localEndPoint = new IPEndPoint(App.LocalOwnIP, Default.DefaultPort);
+            LocalConnection = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            LocalConnection.Bind(localEndPoint);
+            LocalConnection.Listen(10);
+            LocalConnection.BeginAccept(new AsyncCallback(AcceptClient), LocalConnection);
+        }
+
+        /// <summary>
+        /// Accept a client as host
+        /// </summary>
+        /// <param name="ar"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static void AcceptClient(IAsyncResult ar)
+        {
+            // Setup connection
+            Tuple<string, string, Socket> request = ar.AsyncState as Tuple<string, string, Socket> ?? throw new ArgumentNullException(nameof(ar.AsyncState));
+            Socket socket = Connection.EndAccept(ar);
+
+            if (request.Item2 == App.Password && !Clients.ContainsKey(request.Item1))
             {
-                // Setup connection
-                Tuple<string, string, Socket> request = ar.AsyncState as Tuple<string, string, Socket> ?? throw new ArgumentNullException(nameof(ar.AsyncState));
-                Socket socket = Connection.EndAccept(ar);
+                Clients.Add(request.Item1, (socket, new byte[_BufferSize]));
 
-                if (request.Item2 == password)
+                // Setup sending
+                MessageSendEventHandler += (_, e) =>
                 {
-                    Clients.Add(request.Item1, (socket, new byte[_BufferSize]));
-
-                    // Setup sending
-                    MessageSendEventHandler += (_, e) =>
+                    byte[] buffer = new Message()
                     {
-                        socket.Send(new Message()
-                        {
-                            Sender = e.Sender,
-                            SendTime = e.SendTime,
-                            Subject = e.Subject,
-                            Content = e.Message,
-                        }.SerializeToByteArray());
-                    };
+                        Sender = e.Sender,
+                        SendTime = e.SendTime,
+                        Subject = e.Subject,
+                        Content = e.Message,
+                    }.SerializeToByteArray();
+                    socket.Send(buffer, 0, buffer.Length, SocketFlags.None);
+                };
 
-                    // Setup receiving
-                    socket.BeginReceive(Clients[request.Item1].buffer, 0, Clients[request.Item1].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
-                }
-                else
+                // Setup receiving
+                socket.BeginReceive(Clients[request.Item1].buffer, 0, Clients[request.Item1].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
+            }
+            else if (request.Item2 != App.Password)
+            {
+                byte[] buffer = new Message()
                 {
-                    socket.Send(new Message()
-                    {
-                        Sender = nickname,
-                        SendTime = DateTime.Now,
-                        Subject = Subject.Kick,
-                        Content = null
-                    }.SerializeToByteArray());
-                }
-            }), Connection);
+                    Sender = App.Nickname,
+                    SendTime = DateTime.Now,
+                    Subject = Subject.Kick,
+                    Content = "Your password was incorect!"
+                }.SerializeToByteArray();
+                socket.Send(buffer, 0, buffer.Length, SocketFlags.None);
+            }
+            else if (!Clients.ContainsKey(request.Item1))
+            {
+                byte[] buffer = new Message()
+                {
+                    Sender = App.Nickname,
+                    SendTime = DateTime.Now,
+                    Subject = Subject.Kick,
+                    Content = "Your nickname is already used! Please choose another nickname!"
+                }.SerializeToByteArray();
+                socket.Send(buffer, 0, buffer.Length, SocketFlags.None);
+            }
+
+            try{ Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection); }
+            catch {}
+            try { LocalConnection.BeginAccept(new AsyncCallback(AcceptClient), LocalConnection); }
+            catch { }
         }
 
         /// <summary>

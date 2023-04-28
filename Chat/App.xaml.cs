@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System;
 using System.Text.RegularExpressions;
 using Chat.Commuication;
+using System.Net.Sockets;
 
 namespace Chat
 {
@@ -25,9 +26,19 @@ namespace Chat
         public static string Nickname;
 
         /// <summary>
+        /// Password of the current season
+        /// </summary>
+        public static string Password;
+
+        /// <summary>
         /// IP of the running pc
         /// </summary>
         public static IPAddress OwnIP;
+
+        /// <summary>
+        /// Local ip of the running pc
+        /// </summary>
+        public static IPAddress LocalOwnIP;
 
         protected override async void OnStartup(StartupEventArgs e)
         {
@@ -76,7 +87,7 @@ namespace Chat
                 }
             }
 
-            // Get own ip
+            // Get own public ip
             using (WebClient client = new WebClient())
             {
                 try
@@ -103,6 +114,9 @@ namespace Chat
                     return;
                 }
             }
+
+            // Get own local ip
+            LocalOwnIP = (await Dns.GetHostAddressesAsync(Dns.GetHostName())).FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork) ?? IPAddress.None;
 
             base.OnStartup(e);
         }
