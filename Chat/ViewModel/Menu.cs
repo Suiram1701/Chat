@@ -1,5 +1,8 @@
-﻿using Localization;
+﻿using Chat.Commuication;
+using Chat.View;
+using Localization;
 using Microsoft.Win32;
+using System.Diagnostics;
 using System.Net;
 using System.Security.RightsManagement;
 using System.Text;
@@ -38,7 +41,11 @@ namespace Chat.ViewModel
             // Init commands
             StartChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)) && !HasError(nameof(Password)), parameter =>
             {
-                //TODO: Start new chat
+                App.Nickname = Nickname + " (Host)";
+                App.Password = Password;
+                new ChatWindow().Show();
+                Com.InitHost();
+                Application.Current.MainWindow.Close();
             });
 
             LoadChatHistoryCommand = new DelegateCommand(parameter =>
@@ -71,7 +78,11 @@ namespace Chat.ViewModel
 
             JoinChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)) && !HasError(nameof(Password)) && !HasError(nameof(JoinIP)), parameter =>
             {
-                //TODO: Join chat
+                App.Nickname = Nickname;
+                App.Password = Password;
+                new ChatWindow().Show();
+                Com.InitClient(IPAddress.Parse(JoinIP), App.Nickname, App.Password);
+                Application.Current.MainWindow.Close();
             });
         }
 

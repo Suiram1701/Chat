@@ -1,5 +1,7 @@
-﻿using Chat.Model;
+﻿using Chat.Commuication;
+using Chat.Model;
 using Chat.View;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using static Localization.LangHelper;
@@ -45,10 +47,41 @@ namespace Chat.ViewModel
                 parameter => !string.IsNullOrEmpty(MessageInput),
                 parameter =>
                 {
-                    MessageInput = string.Empty;
+                    Com.SendMsg(MessageInput);
+                    if (App.IsHost)
+                    {
+                        Messages.Add(new Message()
+                        {
+                            Sender = App.Nickname,
+                            SendTime = DateTime.Now,
+                            Subject = Subject.Msg,
+                            Content = MessageInput
+                        });
+                        RaisePropertyChanged(nameof(Messages));
+                    }
 
-                    // Send Msg
+                    MessageInput = string.Empty;
                 });
+
+            // Setup chat
+            Com.MessageReceivedEventHandler += (_, e) =>
+            {
+                switch (e.Subject)
+                {
+                    case Subject.Msg:
+                    case Subject.Join:
+                    case Subject.Leave:
+                        Messages.Add(new Message()
+                        {
+                            Sender = e.Sender,
+                            SendTime = e.SendTime,
+                            Subject = e.Subject,
+                            Content = e.Message
+                        });
+                        RaisePropertyChanged(nameof(Messages));
+                        break;
+                }
+            };
         }
 
         // Commands

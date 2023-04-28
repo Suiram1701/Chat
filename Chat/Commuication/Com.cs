@@ -51,6 +51,7 @@ namespace Chat.Commuication
         /// <param name="address">Address to join</param>
         public static void InitClient(IPAddress address, string nickname, string password)
         {
+            App.IsHost = false;
             IPEndPoint endPoint = new IPEndPoint(address, Default.DefaultPort);
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
@@ -83,19 +84,22 @@ namespace Chat.Commuication
         /// </summary>
         public static void InitHost()
         {
-            // Setup public ip bind
-            IPEndPoint endPoint = new IPEndPoint(App.OwnIP, Default.DefaultPort);
-            Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
-            Connection.Bind(endPoint);
-            Connection.Listen(10);
-            Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection);
+            App.IsHost = true;
+            Clients = new Dictionary<string, (Socket connection, byte[] buffer)>();
 
             // Setup local ip bind
             IPEndPoint localEndPoint = new IPEndPoint(App.LocalOwnIP, Default.DefaultPort);
-            LocalConnection = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            LocalConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             LocalConnection.Bind(localEndPoint);
             LocalConnection.Listen(10);
             LocalConnection.BeginAccept(new AsyncCallback(AcceptClient), LocalConnection);
+            /*
+            // Setup public ip bind
+            IPEndPoint endPoint = new IPEndPoint(App.OwnIP, Default.DefaultPort);
+            Connection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Connection.Bind(endPoint);
+            Connection.Listen(10);
+            Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection);*/
         }
 
         /// <summary>
@@ -183,6 +187,13 @@ namespace Chat.Commuication
             }
             Clients.Clear();
         }
+
+        /// <summary>
+        /// Invoke <see cref="MessageSendEventHandler"/>
+        /// </summary>
+        /// <param name="msg"></param>
+        public static void SendMsg(string msg) =>
+            MessageSendEventHandler?.Invoke(null, new MessageEventArgs(App.Nickname, DateTime.Now, Subject.Msg, msg));
 
         #region Receiving
         private static byte[] _Receivebuffer = new byte[_BufferSize];
