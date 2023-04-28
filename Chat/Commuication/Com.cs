@@ -13,17 +13,13 @@ using Chat.Model;
 using Chat.Extensions;
 using System.IO;
 using System.Xml.Serialization;
+using Chat.View;
 
 namespace Chat.Commuication
 {
     internal static class Com
     {
         private static readonly int _BufferSize = 1024;
-
-        /// <summary>
-        /// Local ip end point binding for host
-        /// </summary>
-        public static Socket LocalConnection { get; private set; }
 
         /// <summary>
         /// Own connection for client and listen connection for host
@@ -69,14 +65,30 @@ namespace Chat.Commuication
             };
 
             // Connect
-            Connection.BeginConnect(endPoint, new AsyncCallback(ar =>
-            {
-                Connection.EndConnect(ar);
-                MessageSendEventHandler?.Invoke(null, new MessageEventArgs(nickname, DateTime.Now, Subject.Join, null));
-            }), (nickname, password, Connection));
+            Connection.Connect(endPoint);
 
-            // Add reciving
-            Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
+            if (Connection.Connected)
+            {
+                // Add reciving
+                Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
+
+                // Greet msg
+                byte[] buffer = new Message
+                {
+                    Sender = App.Nickname,
+                    SendTime = DateTime.Now,
+                    Subject = Subject.Join,
+                    Content = App.Password
+                }.SerializeToByteArray();
+                Connection.Send(buffer);
+            }
+            else
+            {
+                EndAll();
+                MessageBox.Show("Cannot connect to the specified IP address!", "No connection!", MessageBoxButton.OK, MessageBoxImage.Error);
+                new Menu().Show();
+                Application.Current.MainWindow.Close();
+            }
         }
 
         /// <summary>
@@ -88,18 +100,11 @@ namespace Chat.Commuication
             Clients = new Dictionary<string, (Socket connection, byte[] buffer)>();
 
             // Setup local ip bind
-            IPEndPoint localEndPoint = new IPEndPoint(App.LocalOwnIP, Default.DefaultPort);
-            LocalConnection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            LocalConnection.Bind(localEndPoint);
-            LocalConnection.Listen(10);
-            LocalConnection.BeginAccept(new AsyncCallback(AcceptClient), LocalConnection);
-            /*
-            // Setup public ip bind
-            IPEndPoint endPoint = new IPEndPoint(App.OwnIP, Default.DefaultPort);
+            IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Default.DefaultPort);
             Connection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Connection.Bind(endPoint);
+            Connection.Bind(localEndPoint);
             Connection.Listen(10);
-            Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection);*/
+            Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection);
         }
 
         /// <summary>
@@ -110,13 +115,41 @@ namespace Chat.Commuication
         public static void AcceptClient(IAsyncResult ar)
         {
             // Setup connection
-            Tuple<string, string, Socket> request = ar.AsyncState as Tuple<string, string, Socket> ?? throw new ArgumentNullException(nameof(ar.AsyncState));
             Socket socket = Connection.EndAccept(ar);
 
-            if (request.Item2 == App.Password && !Clients.ContainsKey(request.Item1))
+            byte[] buffer = new byte[_BufferSize];
+            int size = socket.Receive(buffer);
+            Message msg;
+            using (MemoryStream stream = new MemoryStream(buffer))
             {
-                Clients.Add(request.Item1, (socket, new byte[_BufferSize]));
+                XmlSerializer serializer = new XmlSerializer(typeof(Message));
+                msg = (Message)serializer.Deserialize(stream);
+            }
 
+            if (msg.Subject == Subject.Join)
+            {
+                Clients.Add(msg.Sender, (socket, new byte[_BufferSize]));
+
+                // Setup receiving
+                socket.BeginReceive(Clients[msg.Sender].buffer, 0, Clients[msg.Sender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
+
+                // Setup sending
+                MessageSendEventHandler += (_, e) =>
+                {
+                    byte[] sendBuffer = new Message()
+                    {
+                        Sender = e.Sender,
+                        SendTime = e.SendTime,
+                        Subject = e.Subject,
+                        Content = e.Message,
+                    }.SerializeToByteArray();
+                    socket.Send(sendBuffer, 0, sendBuffer.Length, SocketFlags.None);
+                };
+            }
+
+            /* 
+            if (request.Item2 == App.Password && !Clients.ContainsKey(request.Item1))
+            
                 // Setup sending
                 MessageSendEventHandler += (_, e) =>
                 {
@@ -155,11 +188,7 @@ namespace Chat.Commuication
                 }.SerializeToByteArray();
                 socket.Send(buffer, 0, buffer.Length, SocketFlags.None);
             }
-
-            try{ Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection); }
-            catch {}
-            try { LocalConnection.BeginAccept(new AsyncCallback(AcceptClient), LocalConnection); }
-            catch { }
+            */
         }
 
         /// <summary>
