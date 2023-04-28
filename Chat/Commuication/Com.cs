@@ -65,16 +65,14 @@ namespace Chat.Commuication
                     Subject = e.Subject,
                     Content = e.Message
                 }.SerializeToByteArray();
-                Connection?.Send(buffer, 0, buffer.Length, SocketFlags.None);
+                if (Connection.Connected)
+                    Connection?.Send(buffer, 0, buffer.Length, SocketFlags.None);
             };
 
             // Connect
-            Connection.BeginConnect(endPoint, new AsyncCallback(ar =>
-            {
-                Connection.EndConnect(ar);
-                MessageSendEventHandler?.Invoke(null, new MessageEventArgs(nickname, DateTime.Now, Subject.Join, null));
-            }), (nickname, password, Connection));
+            Connection.Connect(endPoint);
 
+            MessageSendEventHandler?.Invoke(null, new MessageEventArgs(nickname, DateTime.Now, Subject.Join, null));
             // Add reciving
             Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
         }
