@@ -21,6 +21,11 @@ namespace Chat.Commuication
         private static readonly int _BufferSize = 1024;
 
         /// <summary>
+        /// Local ip end point binding for host
+        /// </summary>
+        public static Socket LocalConnection { get; private set; }
+
+        /// <summary>
         /// Own connection for client and listen connection for host
         /// </summary>
         public static Socket Connection { get; private set; }
@@ -78,10 +83,17 @@ namespace Chat.Commuication
         /// </summary>
         public static void InitHost(string nickname, string password)
         {
+            // Setup public ip bind
             IPEndPoint endPoint = new IPEndPoint(App.OwnIP, Default.DefaultPort);
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
             Connection.Bind(endPoint);
             Connection.Listen(10);
+
+            // Setup local ip bind
+            IPEndPoint localEndPoint = new IPEndPoint(App.LocalOwnIP, Default.DefaultPort);
+            LocalConnection = new Socket(SocketType.Stream, ProtocolType.Tcp);
+            LocalConnection.Bind(localEndPoint);
+            LocalConnection.Listen(10);
 
             // Setup connection accepting
             Connection.BeginAccept(new AsyncCallback(ar =>
@@ -90,34 +102,47 @@ namespace Chat.Commuication
                 Tuple<string, string, Socket> request = ar.AsyncState as Tuple<string, string, Socket> ?? throw new ArgumentNullException(nameof(ar.AsyncState));
                 Socket socket = Connection.EndAccept(ar);
 
-                if (request.Item2 == password)
+                if (request.Item2 == password && !Clients.ContainsKey(request.Item1))
                 {
                     Clients.Add(request.Item1, (socket, new byte[_BufferSize]));
 
                     // Setup sending
                     MessageSendEventHandler += (_, e) =>
                     {
-                        socket.Send(new Message()
+                        byte[] buffer = new Message()
                         {
                             Sender = e.Sender,
                             SendTime = e.SendTime,
                             Subject = e.Subject,
                             Content = e.Message,
-                        }.SerializeToByteArray());
+                        }.SerializeToByteArray();
+                        socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ar_respone => socket.EndSend(ar)), socket);
                     };
 
                     // Setup receiving
                     socket.BeginReceive(Clients[request.Item1].buffer, 0, Clients[request.Item1].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
                 }
-                else
+                else if (request.Item2 != password)
                 {
-                    socket.Send(new Message()
+                    byte[] buffer = new Message()
                     {
                         Sender = nickname,
                         SendTime = DateTime.Now,
                         Subject = Subject.Kick,
-                        Content = null
-                    }.SerializeToByteArray());
+                        Content = "Your password was incorect!"
+                    }.SerializeToByteArray();
+                    socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ar_respone => socket.EndSend(ar)), socket);
+                }
+                else if (!Clients.ContainsKey(request.Item1))
+                {
+                    byte[] buffer = new Message()
+                    {
+                        Sender = nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Kick,
+                        Content = "Your nickname is already used! Please choose another nickname!"
+                    }.SerializeToByteArray();
+                    socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ar_respone => socket.EndSend(ar)), socket);
                 }
             }), Connection);
         }
