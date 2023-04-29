@@ -121,7 +121,7 @@ namespace Chat.Commuication
             // Setup sending
             MessageSendEventHandler += (sender, e) =>
             {
-                foreach ((_, Socket socket, _, _) in Clients.Values)
+                miforeach ((_, Socket socket, _, _) in Clients.Values)
                 {
                     if (socket.Connected && sender?.ToString() != ((IPEndPoint)socket.RemoteEndPoint).Address.ToString())
                     {
@@ -331,9 +331,12 @@ namespace Chat.Commuication
                         if (!App.IsHost)
                         {
                             EndAll();
-                            Application.Current.MainWindow.Close();
-                            new Menu().Show();
-                            MessageBox.Show(message.Content?.ToString(), "You was kicked!", MessageBoxButton.OK, MessageBoxImage.None);
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                new Menu().Show();
+                                ChatWindow.Instance.Close();
+                                MessageBox.Show(message.Content?.ToString(), "You was kicked!", MessageBoxButton.OK, MessageBoxImage.None);
+                            });
                         }
                         break;
                 }

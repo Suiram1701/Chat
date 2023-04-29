@@ -22,8 +22,13 @@ namespace Chat.View
     /// </summary>
     public partial class ChatWindow : Window
     { 
-        public ChatWindow() =>
+        public static ChatWindow Instance { get; private set; }
+
+        public ChatWindow()
+        {
             InitializeComponent();
+            Instance = this;
+        }
 
         #region Window chrome
         /// <summary>
