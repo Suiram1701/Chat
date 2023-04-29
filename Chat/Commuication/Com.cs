@@ -331,9 +331,12 @@ namespace Chat.Commuication
                         if (!App.IsHost)
                         {
                             EndAll();
-                            Application.Current.MainWindow.Close();
-                            new Menu().Show();
-                            MessageBox.Show(message.Content?.ToString(), "You was kicked!", MessageBoxButton.OK, MessageBoxImage.None);
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                new Menu().Show();
+                                ChatWindow.Instance.Close();
+                                MessageBox.Show(message.Content?.ToString(), "You was kicked!", MessageBoxButton.OK, MessageBoxImage.None);
+                            });
                         }
                         break;
                 }
