@@ -142,6 +142,45 @@ namespace Chat.Commuication
 
             if (msg.Subject == Subject.Join)
             {
+                if (msg.Content.ToString() != App.Password)
+                {
+                    byte[] sendBuffer = new Message()
+                    {
+                        Sender = App.Nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Kick,
+                        Content = "Your password is incorect!"
+                    }.SerializeToByteArray();
+                    socket.BeginSend(sendBuffer, 0, sendBuffer.Length, SocketFlags.None, new AsyncCallback(sendAr =>
+                    {
+                        socket.EndSend(sendAr);
+                        socket.Disconnect(false);
+                        socket.Close();
+
+                        Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
+                        return;
+                    }), socket);
+                }
+                else if (Clients.Values.Any(v => v.username == msg.Sender))
+                {
+                    byte[] sendBuffer = new Message()
+                    {
+                        Sender = App.Nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Kick,
+                        Content = "Your nickname is allready choosen! Please choose another nickname."
+                    }.SerializeToByteArray();
+                    socket.BeginSend(sendBuffer, 0, sendBuffer.Length, SocketFlags.None, new AsyncCallback(sendAr =>
+                    {
+                        socket.EndSend(sendAr);
+                        socket.Disconnect(false);
+                        socket.Close();
+
+                        Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
+                        return;
+                    }), socket);
+                }
+
                 // Add client list
                 Clients.Add(ipSender, (msg.Sender, socket, null, new byte[_BufferSize]));
                 System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}, ip: {ipSender}");
@@ -164,48 +203,7 @@ namespace Chat.Commuication
                 };
             }
 
-            /* 
-            if (request.Item2 == App.Password && !Clients.ContainsKey(request.Item1))
-            
-                // Setup sending
-                MessageSendEventHandler += (_, e) =>
-                {
-                    byte[] buffer = new Message()
-                    {
-                        Sender = e.Sender,
-                        SendTime = e.SendTime,
-                        Subject = e.Subject,
-                        Content = e.Message,
-                    }.SerializeToByteArray();
-                    socket.Send(buffer, 0, buffer.Length, SocketFlags.None);
-                };
-
-                // Setup receiving
-                socket.BeginReceive(Clients[request.Item1].buffer, 0, Clients[request.Item1].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
-            }
-            else if (request.Item2 != App.Password)
-            {
-                byte[] buffer = new Message()
-                {
-                    Sender = App.Nickname,
-                    SendTime = DateTime.Now,
-                    Subject = Subject.Kick,
-                    Content = "Your password was incorect!"
-                }.SerializeToByteArray();
-                socket.Send(buffer, 0, buffer.Length, SocketFlags.None);
-            }
-            else if (!Clients.ContainsKey(request.Item1))
-            {
-                byte[] buffer = new Message()
-                {
-                    Sender = App.Nickname,
-                    SendTime = DateTime.Now,
-                    Subject = Subject.Kick,
-                    Content = "Your nickname is already used! Please choose another nickname!"
-                }.SerializeToByteArray();
-                socket.Send(buffer, 0, buffer.Length, SocketFlags.None);
-            }
-            */
+            Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
         }
 
         /// <summary>
@@ -218,7 +216,17 @@ namespace Chat.Commuication
                 if (App.IsHost)
                     Connection?.EndAccept(_ConnectionAsyncProccess);
                 else
+                {
+                    byte[] buffer = new Message()
+                    {
+                        Sender = App.Nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Leave,
+                        Content = null
+                    }.SerializeToByteArray();
+                    Connection?.Send(buffer, SocketFlags.None);
                     Connection?.EndReceive(_ConnectionAsyncProccess);
+                }
             }
             catch { }
             Connection?.Shutdown(SocketShutdown.Both);
@@ -298,7 +306,6 @@ namespace Chat.Commuication
                     case Subject.Kick:
                         if (!App.IsHost)
                         {
-                            MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(App.Nickname, DateTime.Now, Subject.Leave, null));
                             EndAll();
                             MessageBox.Show("You was kicked from the chat!", "You was kicked!", MessageBoxButton.OK, MessageBoxImage.None);
                         }
