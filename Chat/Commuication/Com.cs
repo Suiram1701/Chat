@@ -123,7 +123,7 @@ namespace Chat.Commuication
             {
                 foreach ((_, Socket socket, _, _) in Clients.Values)
                 {
-                    if (socket.Connected && sender != ((IPEndPoint)socket.RemoteEndPoint).Address)
+                    if (socket.Connected && sender?.ToString() != ((IPEndPoint)socket.RemoteEndPoint).Address.ToString())
                     {
                         byte[] sendBuffer = new Message()
                         {
@@ -256,7 +256,7 @@ namespace Chat.Commuication
                         Sender = App.Nickname,
                         SendTime = DateTime.Now,
                         Subject = Subject.Kick,
-                        Content = "The has been host shutdown the server!",
+                        Content = "The host has been shutdown the server!",
                     }.SerializeToByteArray());
                     socket?.Shutdown(SocketShutdown.Both);
                     socket?.Disconnect(false);
@@ -322,6 +322,8 @@ namespace Chat.Commuication
                         if (!App.IsHost)
                         {
                             EndAll();
+                            Application.Current.MainWindow.Close();
+                            new Menu().Show();
                             MessageBox.Show(message.Content?.ToString(), "You was kicked!", MessageBoxButton.OK, MessageBoxImage.None);
                         }
                         break;
