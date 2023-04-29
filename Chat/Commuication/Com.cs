@@ -331,6 +331,7 @@ namespace Chat.Commuication
                     case Subject.Kick:
                         if (!App.IsHost)
                         {
+                            Kick:
                             EndAll();
                             Application.Current.Dispatcher.Invoke(() =>
                             {
