@@ -74,8 +74,11 @@ namespace Chat.View
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Exit_Click(object sender, RoutedEventArgs e) =>
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            Com.EndAll();
             Application.Current.Shutdown();
+        }
 
         #endregion
 
