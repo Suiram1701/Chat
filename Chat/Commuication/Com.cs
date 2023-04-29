@@ -291,7 +291,9 @@ namespace Chat.Commuication
         /// <param name="ar"></param>
         private static void ReceivingAsyncClient(IAsyncResult ar)
         {
-            int bytes = Connection?.EndReceive(ar) ?? 0;
+            int bytes = 0;
+            try { bytes = Connection?.EndReceive(ar) ?? 0; }
+            catch { }
 
             if (bytes <= 0)
                 goto End;
@@ -330,6 +332,7 @@ namespace Chat.Commuication
                     case Subject.Kick:
                         if (!App.IsHost)
                         {
+                            Kick:
                             EndAll();
                             Application.Current.Dispatcher.Invoke(() =>
                             {
