@@ -15,6 +15,7 @@ using System.IO;
 using System.Xml.Serialization;
 using Chat.View;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Chat.Commuication
 {
@@ -141,8 +142,13 @@ namespace Chat.Commuication
 
             if (msg.Subject == Subject.Join)
             {
+                // Add client list
+                Clients.Add(ipSender, (msg.Sender, socket, null, new byte[_BufferSize]));
+                System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}, ip: {ipSender}");
+
                 // Setup receiving
                 IAsyncResult proccess = socket.BeginReceive(Clients[ipSender].buffer, 0, Clients[ipSender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
+                Clients[ipSender] = (msg.Sender, socket, proccess, Clients[ipSender].buffer);
 
                 // Setup sending
                 MessageSendEventHandler += (_, e) =>
@@ -156,9 +162,6 @@ namespace Chat.Commuication
                     }.SerializeToByteArray();
                     socket.Send(sendBuffer, 0, sendBuffer.Length, SocketFlags.None);
                 };
-
-                Clients.Add(ipSender, (msg.Sender, socket, proccess, new byte[_BufferSize]));
-                System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}, ip: {ipSender}");
             }
 
             /* 
@@ -210,10 +213,14 @@ namespace Chat.Commuication
         /// </summary>
         public static void EndAll()
         {
-            if (App.IsHost)
-                Connection?.EndAccept(_ConnectionAsyncProccess);
-            else
-                Connection?.EndReceive(_ConnectionAsyncProccess);
+            try
+            {
+                if (App.IsHost)
+                    Connection?.EndAccept(_ConnectionAsyncProccess);
+                else
+                    Connection?.EndReceive(_ConnectionAsyncProccess);
+            }
+            catch { }
             Connection?.Shutdown(SocketShutdown.Both);
             Connection?.Disconnect(false);
             Connection?.Close();
