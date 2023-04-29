@@ -121,7 +121,7 @@ namespace Chat.Commuication
             // Setup sending
             MessageSendEventHandler += (sender, e) =>
             {
-                foreach ((_, Socket socket, _, _) in Clients.Values)
+                miforeach ((_, Socket socket, _, _) in Clients.Values)
                 {
                     if (socket.Connected && sender?.ToString() != ((IPEndPoint)socket.RemoteEndPoint).Address.ToString())
                     {
@@ -178,10 +178,10 @@ namespace Chat.Commuication
                         socket.EndSend(sendAr);
                         socket.Disconnect(false);
                         socket.Close();
-
-                        Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
-                        return;
                     }), socket);
+
+                    Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
+                    return;
                 }
                 else if (Clients.Values.Any(v => v.username == msg.Sender))
                 {
@@ -197,20 +197,25 @@ namespace Chat.Commuication
                         socket.EndSend(sendAr);
                         socket.Disconnect(false);
                         socket.Close();
-
-                        Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
-                        return;
                     }), socket);
+                    Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
+                    return;
                 }
 
                 // Add client list
+                if (Clients.ContainsKey(ipSender))
+                    goto End;
+
                 Clients.Add(ipSender, (msg.Sender, socket, null, new byte[_BufferSize]));
                 System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}, ip: {ipSender}");
 
                 // Setup receiving
-                IAsyncResult proccess = socket.BeginReceive(Clients[ipSender].buffer, 0, Clients[ipSender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
+                IAsyncResult proccess;
+                try { proccess = socket.BeginReceive(Clients[ipSender].buffer, 0, Clients[ipSender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket); }
+                catch { goto End; }
                 Clients[ipSender] = (msg.Sender, socket, proccess, Clients[ipSender].buffer);
             }
+            End:
             Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
         }
 
