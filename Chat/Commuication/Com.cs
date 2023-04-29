@@ -251,16 +251,20 @@ namespace Chat.Commuication
                 {
                     try { socket?.EndReceive(proccess); }
                     catch { }
-                    socket.Send(new Message()
+                    byte[] buffer = new Message()
                     {
                         Sender = App.Nickname,
                         SendTime = DateTime.Now,
                         Subject = Subject.Kick,
                         Content = "The host has been shutdown the server!",
-                    }.SerializeToByteArray());
-                    socket?.Shutdown(SocketShutdown.Both);
-                    socket?.Disconnect(false);
-                    socket?.Close();
+                    }.SerializeToByteArray();
+                    socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ar =>
+                    {
+                        socket?.EndSend(ar);
+                        socket?.Shutdown(SocketShutdown.Both);
+                        socket?.Disconnect(false);
+                        socket?.Close();
+                    }), socket);
                 }
                 Clients?.Clear();
             }
