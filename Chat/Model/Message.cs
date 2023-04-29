@@ -35,7 +35,7 @@ namespace Chat.Model
         Kick = 4,
     }
 
-    internal class Message
+    public class Message
     {
         [XmlAttribute("sender")]
         /// <summary>

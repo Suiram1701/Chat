@@ -29,7 +29,7 @@ namespace Chat.Commuication
         /// <summary>
         /// All clients that are connected with host
         /// </summary>
-        public static Dictionary<string, (Socket connection, byte[] buffer)> Clients { get; private set; }
+        public static Dictionary<string, (string username, Socket connection, byte[] buffer)> Clients { get; private set; }
 
         /// <summary>
         /// Invoked when a message sended
@@ -100,7 +100,7 @@ namespace Chat.Commuication
         public static void InitHost()
         {
             App.IsHost = true;
-            Clients = new Dictionary<string, (Socket connection, byte[] buffer)>();
+            Clients = new Dictionary<string, (string username, Socket connection, byte[] buffer)>();
 
             // Setup local ip bind
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Default.DefaultPort);
@@ -121,6 +121,7 @@ namespace Chat.Commuication
             Socket socket = Connection.EndAccept(ar);
             System.Diagnostics.Debug.WriteLine($"Host received connection request!");
 
+            string ipSender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).ToString();
             byte[] buffer = new byte[_BufferSize];
             int size = socket.Receive(buffer);
             Message msg;
@@ -132,11 +133,11 @@ namespace Chat.Commuication
 
             if (msg.Subject == Subject.Join)
             {
-                Clients.Add(msg.Sender, (socket, new byte[_BufferSize]));
-                System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}");
+                Clients.Add(ipSender, (msg.Sender, socket, new byte[_BufferSize]));
+                System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}, ip: {ipSender}");
 
                 // Setup receiving
-                socket.BeginReceive(Clients[msg.Sender].buffer, 0, Clients[msg.Sender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
+                socket.BeginReceive(Clients[ipSender].buffer, 0, Clients[ipSender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
 
                 // Setup sending
                 MessageSendEventHandler += (_, e) =>
@@ -294,8 +295,8 @@ namespace Chat.Commuication
         /// <param name="ar"></param>
         private static void ReceivingAsyncHost(IAsyncResult ar)
         {
-            int bytes = Connection.EndReceive(ar);
-            string sender = (ar.AsyncState as (string, Socket)?)?.Item1;
+            string sender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).Address.ToString();
+            int bytes = Clients[sender].connection.EndReceive(ar);
 
             if (bytes <= 0)
                 goto End;
@@ -321,13 +322,14 @@ namespace Chat.Commuication
                 switch (message.Subject)
                 {
                     case Subject.Leave:
-                        Socket con = Clients[message.Sender].connection;
+                        Socket con = Clients[sender].connection;
                         con.Shutdown(SocketShutdown.Both);
                         con.Disconnect(false);
                         con.Close();
-                        Clients.Remove(message.Sender);
+                        Clients.Remove(sender);
                         MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
                         MessageSendEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        System.Diagnostics.Debug.WriteLine($"Client {message.Sender} left the chat. ip: {sender}");
                         break;
                     case Subject.Msg:
                     case Subject.Join:
