@@ -51,20 +51,6 @@ namespace Chat.Commuication
             IPEndPoint endPoint = new IPEndPoint(address, Default.DefaultPort);
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
-            // Add send event handler
-            MessageSendEventHandler += (_, e) =>
-            {
-                byte[] buffer = new Message()
-                {
-                    Sender = e.Sender,
-                    SendTime = e.SendTime,
-                    Subject = e.Subject,
-                    Content = e.Message
-                }.SerializeToByteArray();
-                if (Connection.Connected)
-                    Connection?.Send(buffer, 0, buffer.Length, SocketFlags.None);
-            };
-
             // Connect
             Connection.Connect(endPoint);
 
@@ -72,6 +58,22 @@ namespace Chat.Commuication
             {
                 // Add reciving
                 Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
+
+                // Add send event handler
+                MessageSendEventHandler += (_, e) =>
+                {
+                    System.Diagnostics.Debug.WriteLine($"Client send: {e.Message}");
+
+                    byte[] sendBuffer = new Message()
+                    {
+                        Sender = e.Sender,
+                        SendTime = e.SendTime,
+                        Subject = e.Subject,
+                        Content = e.Message
+                    }.SerializeToByteArray();
+                    if (Connection.Connected)
+                        Connection?.Send(sendBuffer, 0, sendBuffer.Length, SocketFlags.None);
+                };
 
                 // Greet msg
                 byte[] buffer = new Message
@@ -117,6 +119,7 @@ namespace Chat.Commuication
         {
             // Setup connection
             Socket socket = Connection.EndAccept(ar);
+            System.Diagnostics.Debug.WriteLine($"Host received connection request!");
 
             byte[] buffer = new byte[_BufferSize];
             int size = socket.Receive(buffer);
@@ -130,6 +133,7 @@ namespace Chat.Commuication
             if (msg.Subject == Subject.Join)
             {
                 Clients.Add(msg.Sender, (socket, new byte[_BufferSize]));
+                System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}");
 
                 // Setup receiving
                 socket.BeginReceive(Clients[msg.Sender].buffer, 0, Clients[msg.Sender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
@@ -202,7 +206,7 @@ namespace Chat.Commuication
             Connection?.Close();
             Connection = null;
 
-            foreach ((Socket socket, _) in Clients.Values)
+            foreach ((Socket socket, _) in Clients?.Values)
             {
                 socket.Send(new Message()
                 {
@@ -263,6 +267,7 @@ namespace Chat.Commuication
                     case Subject.Join:
                     case Subject.Leave:
                         MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        System.Diagnostics.Debug.WriteLine($"Client receive: {message.Content}");
                         break;
                     case Subject.Sync:
                         if (App.IsHost)
@@ -328,6 +333,7 @@ namespace Chat.Commuication
                     case Subject.Join:
                         MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
                         MessageSendEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        System.Diagnostics.Debug.WriteLine($"Host receive: {message.Content}");
                         break;
                     case Subject.Sync:
                         if (App.IsHost)
@@ -339,7 +345,7 @@ namespace Chat.Commuication
             }
 
         End:
-            Clients[sender].connection?.BeginReceive(Clients[sender].buffer, 0, Clients[sender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
+            Clients[sender].connection?.BeginReceive(Clients[sender].buffer, 0, Clients[sender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), Clients[sender].connection);
         }
         #endregion
     }
