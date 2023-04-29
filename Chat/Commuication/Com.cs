@@ -21,7 +21,7 @@ namespace Chat.Commuication
 {
     internal static class Com
     {
-        private static readonly int _BufferSize = 1024;
+        private static readonly int _BufferSize = 4096;
 
         /// <summary>
         /// The current async proccess for the connection
@@ -117,6 +117,25 @@ namespace Chat.Commuication
             Connection.Listen(10);
             IAsyncResult proccess = Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection);
             _ConnectionAsyncProccess = proccess;
+
+            // Setup sending
+            MessageSendEventHandler += (sender, e) =>
+            {
+                foreach ((_, Socket socket, _, _) in Clients.Values)
+                {
+                    if (socket.Connected && sender != ((IPEndPoint)socket.RemoteEndPoint).Address)
+                    {
+                        byte[] sendBuffer = new Message()
+                        {
+                            Sender = e.Sender,
+                            SendTime = e.SendTime,
+                            Subject = e.Subject,
+                            Content = e.Message,
+                        }.SerializeToByteArray();
+                        socket.Send(sendBuffer, 0, sendBuffer.Length, SocketFlags.None);
+                    }
+                }
+            };
         }
 
         /// <summary>
@@ -127,7 +146,10 @@ namespace Chat.Commuication
         public static void AcceptClient(IAsyncResult ar)
         {
             // Setup connection
-            Socket socket = Connection.EndAccept(ar);
+            Socket socket = Connection?.EndAccept(ar) ?? null;
+            if (socket == null)
+                return;
+
             System.Diagnostics.Debug.WriteLine($"Host received connection request!");
 
             string ipSender = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
@@ -188,21 +210,7 @@ namespace Chat.Commuication
                 // Setup receiving
                 IAsyncResult proccess = socket.BeginReceive(Clients[ipSender].buffer, 0, Clients[ipSender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
                 Clients[ipSender] = (msg.Sender, socket, proccess, Clients[ipSender].buffer);
-
-                // Setup sending
-                MessageSendEventHandler += (_, e) =>
-                {
-                    byte[] sendBuffer = new Message()
-                    {
-                        Sender = e.Sender,
-                        SendTime = e.SendTime,
-                        Subject = e.Subject,
-                        Content = e.Message,
-                    }.SerializeToByteArray();
-                    socket.Send(sendBuffer, 0, sendBuffer.Length, SocketFlags.None);
-                };
             }
-
             Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
         }
 
@@ -229,10 +237,14 @@ namespace Chat.Commuication
                 }
             }
             catch { }
-            Connection?.Shutdown(SocketShutdown.Both);
-            Connection?.Disconnect(false);
+            if (!App.IsHost)
+            {
+                Connection?.Shutdown(SocketShutdown.Both);
+                Connection?.Disconnect(false);
+            }
             Connection?.Close();
             Connection = null;
+
 
             IEnumerable<(string, Socket, IAsyncResult, string)> Connections = Clients?.Values is null ? new List<(string, Socket, IAsyncResult, string)>() : Clients.Values.Cast<(string, Socket, IAsyncResult, string)>();
             foreach ((_, Socket socket, IAsyncResult proccess, _) in Connections)
@@ -285,8 +297,6 @@ namespace Chat.Commuication
                 }
                 catch (Exception)
                 {
-                    using (FileStream fls = new FileStream("h.xml", FileMode.OpenOrCreate))
-                        fls.Write(stream.ToArray(), 0, 1024);
                     stream.Dispose();
                     
                     goto End;
@@ -357,14 +367,14 @@ namespace Chat.Commuication
                         con.Disconnect(false);
                         con.Close();
                         Clients.Remove(sender);
-                        MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
-                        MessageSendEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        MessageReceivedEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, string.Empty));
+                        MessageSendEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, string.Empty));
                         System.Diagnostics.Debug.WriteLine($"Client {message.Sender} left the chat. ip: {sender}");
-                        break;
+                        return;
                     case Subject.Msg:
                     case Subject.Join:
-                        MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
-                        MessageSendEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        MessageReceivedEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        MessageSendEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
                         System.Diagnostics.Debug.WriteLine($"Host receive: {message.Content}");
                         break;
                     case Subject.Sync:

@@ -33,6 +33,9 @@ namespace Chat.Extensions
                     trys++;
                     goto Deserialize;
                 }
+                else
+                    return stream.GetBuffer();
+
             }
 
             return stream.GetBuffer();
