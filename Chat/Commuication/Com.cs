@@ -14,6 +14,7 @@ using Chat.Extensions;
 using System.IO;
 using System.Xml.Serialization;
 using Chat.View;
+using System.Threading;
 
 namespace Chat.Commuication
 {
@@ -206,7 +207,8 @@ namespace Chat.Commuication
             Connection?.Close();
             Connection = null;
 
-            foreach ((Socket socket, _) in Clients?.Values)
+            IEnumerable<(string, Socket, string)> Connections = Clients?.Values is null ? new List<(string, Socket, string)>() : Clients.Values.Cast<(string, Socket, string)>();
+            foreach ((_, Socket socket, _) in Connections)
             {
                 socket.Send(new Message()
                 {
@@ -267,7 +269,7 @@ namespace Chat.Commuication
                     case Subject.Join:
                     case Subject.Leave:
                         MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
-                        System.Diagnostics.Debug.WriteLine($"Client receive: {message.Content}");
+                        System.Diagnostics.Debug.WriteLine($"Client receive: {message.Content} from {message.Sender}");
                         break;
                     case Subject.Sync:
                         if (App.IsHost)
