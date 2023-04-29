@@ -135,7 +135,7 @@ namespace Chat.ViewModel
                     if (!IPAddress.TryParse(value, out _))
                         AddError(LangHelper.GetString("MenuWindow.ValiErr.JIPInv"));
 
-                    if (value == App.OwnIP.ToString())
+                    if (value == (App.LocalOwnIP?.ToString() ?? value))
                         AddError(LangHelper.GetString("MenuWindow.ValiErr.JIPOwn"));
 
                     RaiseErrorsChanged();

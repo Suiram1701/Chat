@@ -249,7 +249,7 @@ namespace Chat.Commuication
                 socket?.Disconnect(false);
                 socket?.Close();
             }
-            Clients.Clear();
+            Clients?.Clear();
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace Chat.Commuication
         /// <param name="ar"></param>
         private static void ReceivingAsyncClient(IAsyncResult ar)
         {
-            int bytes = Connection.EndReceive(ar);
+            int bytes = Connection?.EndReceive(ar) ?? 0;
 
             if (bytes <= 0)
                 goto End;
