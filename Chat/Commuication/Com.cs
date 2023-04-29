@@ -245,23 +245,25 @@ namespace Chat.Commuication
             Connection?.Close();
             Connection = null;
 
-
-            IEnumerable<(string, Socket, IAsyncResult, string)> Connections = Clients?.Values is null ? new List<(string, Socket, IAsyncResult, string)>() : Clients.Values.Cast<(string, Socket, IAsyncResult, string)>();
-            foreach ((_, Socket socket, IAsyncResult proccess, _) in Connections)
+            if (App.IsHost)
             {
-                socket?.EndReceive(proccess);
-                socket.Send(new Message()
+                foreach ((_, Socket socket, IAsyncResult proccess, _) in Clients.Values)
                 {
-                    Sender = App.Nickname,
-                    SendTime = DateTime.Now,
-                    Subject = Subject.Kick,
-                    Content = "The has been host shutdown the server!",
-                }.SerializeToByteArray());
-                socket?.Shutdown(SocketShutdown.Both);
-                socket?.Disconnect(false);
-                socket?.Close();
+                    try { socket?.EndReceive(proccess); }
+                    catch { }
+                    socket.Send(new Message()
+                    {
+                        Sender = App.Nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Kick,
+                        Content = "The has been host shutdown the server!",
+                    }.SerializeToByteArray());
+                    socket?.Shutdown(SocketShutdown.Both);
+                    socket?.Disconnect(false);
+                    socket?.Close();
+                }
+                Clients?.Clear();
             }
-            Clients?.Clear();
         }
 
         /// <summary>
@@ -319,7 +321,7 @@ namespace Chat.Commuication
                         if (!App.IsHost)
                         {
                             EndAll();
-                            MessageBox.Show("You was kicked from the chat!", "You was kicked!", MessageBoxButton.OK, MessageBoxImage.None);
+                            MessageBox.Show(message.Content?.ToString(), "You was kicked!", MessageBoxButton.OK, MessageBoxImage.None);
                         }
                         break;
                 }
@@ -335,7 +337,9 @@ namespace Chat.Commuication
         /// <param name="ar"></param>
         private static void ReceivingAsyncHost(IAsyncResult ar)
         {
-            string sender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).Address.ToString();
+            string sender;
+            try { sender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).Address.ToString(); }
+            catch (ObjectDisposedException) { return; }
             int bytes = Clients[sender].connection.EndReceive(ar);
 
             if (bytes <= 0)

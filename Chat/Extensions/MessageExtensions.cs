@@ -15,30 +15,13 @@ namespace Chat.Extensions
         /// <returns></returns>
         public static byte[] SerializeToByteArray(this Message message)
         {
-            int trys = 0;
             XmlSerializer serializer = new XmlSerializer(typeof(Message));
-            Deserialize:
-            MemoryStream stream = new MemoryStream();
-            stream.SetLength(0);
-            serializer.Serialize(stream, message);
-
-            try
+            using (MemoryStream ms = new MemoryStream())
             {
-                _ = serializer.Deserialize(stream);
+                serializer.Serialize(ms, message);
+                ms.Position = 0;
+                return ms.ToArray();
             }
-            catch
-            {
-                if (trys <= 10)
-                {
-                    trys++;
-                    goto Deserialize;
-                }
-                else
-                    return stream.GetBuffer();
-
-            }
-
-            return stream.GetBuffer();
         }
     }
 }
