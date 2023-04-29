@@ -303,6 +303,7 @@ namespace Chat.Commuication
                     
                     goto End;
                 }
+                finally { _Receivebuffer = new byte[_BufferSize]; }
 
                 // Interpret message
                 switch (message.Subject)
@@ -338,18 +339,22 @@ namespace Chat.Commuication
         private static void ReceivingAsyncHost(IAsyncResult ar)
         {
             string sender;
-            try { sender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).Address.ToString(); }
-            catch (ObjectDisposedException) { return; }
-            int bytes = Clients[sender].connection.EndReceive(ar);
+            int bytes;
+            try
+            {
+                sender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).Address.ToString();
+                bytes = Clients[sender].connection.EndReceive(ar);
+            }
+            catch { return; }
 
             if (bytes <= 0)
                 goto End;
 
+            Message message;
             using (MemoryStream stream = new MemoryStream(Clients[sender].buffer))
             {
                 // Decode message
                 XmlSerializer serializer = new XmlSerializer(typeof(Message));
-                Message message;
 
                 try
                 {
@@ -361,33 +366,37 @@ namespace Chat.Commuication
                     stream.Dispose();
                     goto End;
                 }
-
-                // Interpret message
-                switch (message.Subject)
+                finally
                 {
-                    case Subject.Leave:
-                        Socket con = Clients[sender].connection;
-                        con.Shutdown(SocketShutdown.Both);
-                        con.Disconnect(false);
-                        con.Close();
-                        Clients.Remove(sender);
-                        MessageReceivedEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, string.Empty));
-                        MessageSendEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, string.Empty));
-                        System.Diagnostics.Debug.WriteLine($"Client {message.Sender} left the chat. ip: {sender}");
-                        return;
-                    case Subject.Msg:
-                    case Subject.Join:
-                        MessageReceivedEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
-                        MessageSendEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
-                        System.Diagnostics.Debug.WriteLine($"Host receive: {message.Content}");
-                        break;
-                    case Subject.Sync:
-                        if (App.IsHost)
-                            break;     //TODO: Syncronize
-                        break;
-                    case Subject.Kick:
-                        break;
+                    Clients[sender] = (Clients[sender].username, Clients[sender].connection, Clients[sender].asyncProccess, new byte[_BufferSize]);
                 }
+            }
+
+            // Interpret message
+            switch (message.Subject)
+            {
+                case Subject.Leave:
+                    Socket con = Clients[sender].connection;
+                    con.Shutdown(SocketShutdown.Both);
+                    con.Disconnect(false);
+                    con.Close();
+                    Clients.Remove(sender);
+                    MessageReceivedEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, string.Empty));
+                    MessageSendEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, string.Empty));
+                    System.Diagnostics.Debug.WriteLine($"Client {message.Sender} left the chat. ip: {sender}");
+                    return;
+                case Subject.Msg:
+                case Subject.Join:
+                    MessageReceivedEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                    MessageSendEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                    System.Diagnostics.Debug.WriteLine($"Host receive: {message.Content}");
+                    break;
+                case Subject.Sync:
+                    if (App.IsHost)
+                        break;     //TODO: Syncronize
+                    break;
+                case Subject.Kick:
+                    break;
             }
 
         End:

@@ -1,7 +1,5 @@
 ﻿using Chat.Model;
-using Microsoft.Win32;
 using System.IO;
-using System.Xml;
 using System.Xml.Serialization;
 
 namespace Chat.Extensions
