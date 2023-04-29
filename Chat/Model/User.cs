@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Chat.Model
+﻿namespace Chat.Model
 {
     internal class User
     {
@@ -13,5 +6,10 @@ namespace Chat.Model
         /// User name
         /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// The ip address
+        /// </summary>
+        public string IP { get; set; }
     }
 }

@@ -43,8 +43,9 @@ namespace Chat.ViewModel
             {
                 App.Nickname = Nickname + " (Host)";
                 App.Password = Password;
-                new ChatWindow().Show();
+                App.IsHost = true;
                 Com.InitHost();
+                new ChatWindow().Show();
                 Application.Current.MainWindow.Close();
             });
 
@@ -80,8 +81,9 @@ namespace Chat.ViewModel
             {
                 App.Nickname = Nickname;
                 App.Password = Password;
+                App.IsHost = false;
+                Com.InitClient(IPAddress.Parse(JoinIP));
                 new ChatWindow().Show();
-                Com.InitClient(IPAddress.Parse(JoinIP), App.Nickname, App.Password);
                 Application.Current.MainWindow.Close();
             });
         }

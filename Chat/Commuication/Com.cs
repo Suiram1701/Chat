@@ -4,18 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using static Chat.Properties.Settings;
-using static Chat.Model.Message;
 using Chat.Model;
 using Chat.Extensions;
 using System.IO;
 using System.Xml.Serialization;
 using Chat.View;
-using System.Threading;
-using System.Diagnostics;
 
 namespace Chat.Commuication
 {
@@ -52,9 +48,8 @@ namespace Chat.Commuication
         /// Initalize the connection for the client
         /// </summary>
         /// <param name="address">Address to join</param>
-        public static void InitClient(IPAddress address, string nickname, string password)
+        public static void InitClient(IPAddress address)
         {
-            App.IsHost = false;
             IPEndPoint endPoint = new IPEndPoint(address, Default.DefaultPort);
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
@@ -107,7 +102,6 @@ namespace Chat.Commuication
         /// </summary>
         public static void InitHost()
         {
-            App.IsHost = true;
             Clients = new Dictionary<string, (string username, Socket connection, IAsyncResult asyncProccess, byte[] buffer)>();
 
             // Setup local ip bind
@@ -146,7 +140,9 @@ namespace Chat.Commuication
         public static void AcceptClient(IAsyncResult ar)
         {
             // Setup connection
-            Socket socket = Connection?.EndAccept(ar) ?? null;
+            Socket socket;
+            try {socket = Connection?.EndAccept(ar) ?? null; }
+            catch {socket = null;}
             if (socket == null)
                 return;
 
@@ -209,6 +205,9 @@ namespace Chat.Commuication
                 Clients.Add(ipSender, (msg.Sender, socket, null, new byte[_BufferSize]));
                 System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}, ip: {ipSender}");
 
+                MessageReceivedEventHandler?.Invoke(ipSender, new MessageEventArgs(msg.Sender, msg.SendTime, Subject.Join, null));
+                MessageSendEventHandler?.Invoke(ipSender, new MessageEventArgs(msg.Sender, msg.SendTime, Subject.Join, null));
+
                 // Setup receiving
                 IAsyncResult proccess;
                 try { proccess = socket.BeginReceive(Clients[ipSender].buffer, 0, Clients[ipSender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket); }
@@ -254,8 +253,6 @@ namespace Chat.Commuication
             {
                 foreach ((_, Socket socket, IAsyncResult proccess, _) in Clients.Values)
                 {
-                    try { socket?.EndReceive(proccess); }
-                    catch { }
                     byte[] buffer = new Message()
                     {
                         Sender = App.Nickname,
@@ -266,6 +263,8 @@ namespace Chat.Commuication
                     socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ar =>
                     {
                         socket?.EndSend(ar);
+                        try { socket?.EndReceive(proccess); }
+                        catch { }
                         socket?.Shutdown(SocketShutdown.Both);
                         socket?.Disconnect(false);
                         socket?.Close();
@@ -291,6 +290,8 @@ namespace Chat.Commuication
         /// <param name="ar"></param>
         private static void ReceivingAsyncClient(IAsyncResult ar)
         {
+            string sender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).Address.ToString();
+
             int bytes = Connection?.EndReceive(ar) ?? 0;
 
             if (bytes <= 0)
@@ -320,7 +321,7 @@ namespace Chat.Commuication
                     case Subject.Msg:
                     case Subject.Join:
                     case Subject.Leave:
-                        MessageReceivedEventHandler?.Invoke(null, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
+                        MessageReceivedEventHandler?.Invoke(sender, new MessageEventArgs(message.Sender, message.SendTime, message.Subject, message.Content.ToString()));
                         System.Diagnostics.Debug.WriteLine($"Client receive: {message.Content} from {message.Sender}");
                         break;
                     case Subject.Sync:

@@ -3,7 +3,10 @@ using Chat.Model;
 using Chat.View;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Windows;
 using static Localization.LangHelper;
 
 namespace Chat.ViewModel
@@ -43,8 +46,7 @@ namespace Chat.ViewModel
         public Chat()
         {
             // Setup commands
-            SendCommand = new DelegateCommand(
-                parameter => !string.IsNullOrEmpty(MessageInput),
+            SendCommand = new DelegateCommand(parameter => !string.IsNullOrEmpty(MessageInput),
                 parameter =>
                 {
                     Com.SendMsg(MessageInput);
@@ -64,24 +66,62 @@ namespace Chat.ViewModel
                 });
 
             // Setup chat
-            Com.MessageReceivedEventHandler += (_, e) =>
+            Com.MessageReceivedEventHandler += (sender, e) =>
             {
-                switch (e.Subject)
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    case Subject.Msg:
-                    case Subject.Join:
-                    case Subject.Leave:
-                        Messages.Add(new Message()
-                        {
-                            Sender = e.Sender,
-                            SendTime = e.SendTime,
-                            Subject = e.Subject,
-                            Content = e.Message
-                        });
-                        RaisePropertyChanged(nameof(Messages));
-                        break;
-                }
+                    switch (e.Subject)
+                    {
+                        case Subject.Msg:
+                            Messages.Add(new Message()
+                            {
+                                Sender = e.Sender,
+                                SendTime = e.SendTime,
+                                Subject = e.Subject,
+                                Content = e.Message
+                            });
+                            break;
+                        case Subject.Join:
+                            Users.Add(new User()
+                            {
+                                Name = e.Sender,
+                                IP = sender.ToString(),
+                            });
+                            Messages.Add(new Message()
+                            {
+                                Sender = "System",
+                                SendTime = e.SendTime,
+                                Subject = e.Subject,
+                                Content = $"{e.Sender} joined the chat"
+                            });
+                            RaisePropertyChanged(nameof(Users));
+                            break;
+                        case Subject.Leave:
+                            Users.Remove(Users.FirstOrDefault(u => u.IP == sender.ToString()));
+                            Messages.Add(new Message()
+                            {
+                                Sender = "System",
+                                SendTime = e.SendTime,
+                                Subject = e.Subject,
+                                Content = $"{e.Sender} left the chat"
+                            });
+                            RaisePropertyChanged(nameof(Users));
+                            break;
+                    }
+                    RaisePropertyChanged(nameof(Messages));
+                });
             };
+
+            // Add self
+            if (App.IsHost)
+            {
+                Users.Add(new User()
+                {
+                    Name = App.Nickname,
+                    IP = App.LocalOwnIP.ToString()
+                });
+                RaisePropertyChanged(nameof(Users));
+            }
         }
 
         // Commands
@@ -119,7 +159,7 @@ namespace Chat.ViewModel
         /// <summary>
         /// List of users in messages in chat
         /// </summary>
-        public List<Message> Messages
+        public ObservableCollection<Message> Messages
         {
             get => _Messages;
             set
@@ -128,12 +168,12 @@ namespace Chat.ViewModel
                 RaisePropertyChanged();
             }
         }
-        private List<Message> _Messages = new List<Message>();
+        private ObservableCollection<Message> _Messages = new ObservableCollection<Message>();
 
         /// <summary>
         /// List of users in chat
         /// </summary>
-        public List<User> Users
+        public ObservableCollection<User> Users
         {
             get => _Users;
             set
@@ -142,6 +182,6 @@ namespace Chat.ViewModel
                 RaisePropertyChanged();
             }
         }
-        private List<User> _Users = new List<User>();
+        private ObservableCollection<User> _Users = new ObservableCollection<User>();
     }
 }
