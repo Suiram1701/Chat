@@ -268,10 +268,12 @@ namespace Chat.Commuication
                 {
                     message = (Message)serializer.Deserialize(stream);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Task.Run(() => MessageBox.Show(ex.Message, "Something went wrong during receiving!", MessageBoxButton.OK, MessageBoxImage.Error));
+                    using (FileStream fls = new FileStream("h.xml", FileMode.OpenOrCreate))
+                        fls.Write(stream.ToArray(), 0, 1024);
                     stream.Dispose();
+                    
                     goto End;
                 }
 
