@@ -23,6 +23,11 @@ namespace Chat.Commuication
         private static readonly int _BufferSize = 1024;
 
         /// <summary>
+        /// The current async proccess for the connection
+        /// </summary>
+        private static IAsyncResult _ConnectionAsyncProccess;
+
+        /// <summary>
         /// Own connection for client and listen connection for host
         /// </summary>
         public static Socket Connection { get; private set; }
@@ -30,7 +35,7 @@ namespace Chat.Commuication
         /// <summary>
         /// All clients that are connected with host
         /// </summary>
-        public static Dictionary<string, (string username, Socket connection, byte[] buffer)> Clients { get; private set; }
+        public static Dictionary<string, (string username, Socket connection, IAsyncResult asyncProccess, byte[] buffer)> Clients { get; private set; }
 
         /// <summary>
         /// Invoked when a message sended
@@ -58,7 +63,8 @@ namespace Chat.Commuication
             if (Connection.Connected)
             {
                 // Add reciving
-                Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
+                IAsyncResult proccess = Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
+                _ConnectionAsyncProccess = proccess;
 
                 // Add send event handler
                 MessageSendEventHandler += (_, e) =>
@@ -101,14 +107,15 @@ namespace Chat.Commuication
         public static void InitHost()
         {
             App.IsHost = true;
-            Clients = new Dictionary<string, (string username, Socket connection, byte[] buffer)>();
+            Clients = new Dictionary<string, (string username, Socket connection, IAsyncResult asyncProccess, byte[] buffer)>();
 
             // Setup local ip bind
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, Default.DefaultPort);
             Connection = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             Connection.Bind(localEndPoint);
             Connection.Listen(10);
-            Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection);
+            IAsyncResult proccess = Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection);
+            _ConnectionAsyncProccess = proccess;
         }
 
         /// <summary>
@@ -122,7 +129,7 @@ namespace Chat.Commuication
             Socket socket = Connection.EndAccept(ar);
             System.Diagnostics.Debug.WriteLine($"Host received connection request!");
 
-            string ipSender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).ToString();
+            string ipSender = ((IPEndPoint)socket.RemoteEndPoint).Address.ToString();
             byte[] buffer = new byte[_BufferSize];
             int size = socket.Receive(buffer);
             Message msg;
@@ -134,11 +141,8 @@ namespace Chat.Commuication
 
             if (msg.Subject == Subject.Join)
             {
-                Clients.Add(ipSender, (msg.Sender, socket, new byte[_BufferSize]));
-                System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}, ip: {ipSender}");
-
                 // Setup receiving
-                socket.BeginReceive(Clients[ipSender].buffer, 0, Clients[ipSender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
+                IAsyncResult proccess = socket.BeginReceive(Clients[ipSender].buffer, 0, Clients[ipSender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), socket);
 
                 // Setup sending
                 MessageSendEventHandler += (_, e) =>
@@ -152,6 +156,9 @@ namespace Chat.Commuication
                     }.SerializeToByteArray();
                     socket.Send(sendBuffer, 0, sendBuffer.Length, SocketFlags.None);
                 };
+
+                Clients.Add(ipSender, (msg.Sender, socket, proccess, new byte[_BufferSize]));
+                System.Diagnostics.Debug.WriteLine($"Host connected with client: {msg.Sender}, ip: {ipSender}");
             }
 
             /* 
@@ -203,14 +210,19 @@ namespace Chat.Commuication
         /// </summary>
         public static void EndAll()
         {
+            if (App.IsHost)
+                Connection?.EndAccept(_ConnectionAsyncProccess);
+            else
+                Connection?.EndReceive(_ConnectionAsyncProccess);
             Connection?.Shutdown(SocketShutdown.Both);
             Connection?.Disconnect(false);
             Connection?.Close();
             Connection = null;
 
-            IEnumerable<(string, Socket, string)> Connections = Clients?.Values is null ? new List<(string, Socket, string)>() : Clients.Values.Cast<(string, Socket, string)>();
-            foreach ((_, Socket socket, _) in Connections)
+            IEnumerable<(string, Socket, IAsyncResult, string)> Connections = Clients?.Values is null ? new List<(string, Socket, IAsyncResult, string)>() : Clients.Values.Cast<(string, Socket, IAsyncResult, string)>();
+            foreach ((_, Socket socket, IAsyncResult proccess, _) in Connections)
             {
+                socket?.EndReceive(proccess);
                 socket.Send(new Message()
                 {
                     Sender = App.Nickname,
