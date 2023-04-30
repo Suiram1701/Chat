@@ -46,24 +46,31 @@ namespace Chat.ViewModel
         public Chat()
         {
             // Setup commands
-            SendCommand = new DelegateCommand(parameter => !string.IsNullOrEmpty(MessageInput),
-                parameter =>
+            SendCommand = new DelegateCommand(parameter => !string.IsNullOrEmpty(MessageInput), parameter =>
+            {
+                Com.SendMsg(MessageInput);
+                if (App.IsHost)
                 {
-                    Com.SendMsg(MessageInput);
-                    if (App.IsHost)
+                    Messages.Add(new Message()
                     {
-                        Messages.Add(new Message()
-                        {
-                            Sender = App.Nickname,
-                            SendTime = DateTime.Now,
-                            Subject = Subject.Msg,
-                            Content = MessageInput
-                        });
-                        RaisePropertyChanged(nameof(Messages));
-                    }
+                        Sender = App.Nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Msg,
+                        Content = MessageInput
+                    });
+                    RaisePropertyChanged(nameof(Messages));
+                }
 
-                    MessageInput = string.Empty;
-                });
+                MessageInput = string.Empty;
+            });
+
+            KickUsrCommand = new DelegateCommand(parameter => App.IsHost, parameter =>
+            {
+                // Reason dialog
+                string reason = null;
+
+                Com.KickUsrAsync((string)parameter, reason);
+            });
 
             // Setup chat
             Com.MessageReceivedEventHandler += (sender, e) =>
@@ -113,6 +120,7 @@ namespace Chat.ViewModel
             };
 
             // Add self
+            Users = new ObservableCollection<User>();
             if (App.IsHost)
             {
                 Users.Add(new User()
@@ -129,6 +137,11 @@ namespace Chat.ViewModel
         /// Send the message
         /// </summary>
         public DelegateCommand SendCommand { get; }
+
+        /// <summary>
+        /// A command for the admin to kick a user
+        /// </summary>
+        public DelegateCommand KickUsrCommand { get; }
 
         // Data
         /// <summary>
