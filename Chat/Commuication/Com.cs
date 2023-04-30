@@ -253,6 +253,8 @@ namespace Chat.Commuication
             {
                 foreach ((_, Socket socket, IAsyncResult proccess, _) in Clients.Values)
                 {
+                    try { socket?.EndReceive(proccess); }
+                    catch { }
                     byte[] buffer = new Message()
                     {
                         Sender = App.Nickname,
@@ -263,8 +265,6 @@ namespace Chat.Commuication
                     socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ar =>
                     {
                         socket?.EndSend(ar);
-                        try { socket?.EndReceive(proccess); }
-                        catch { }
                         socket?.Shutdown(SocketShutdown.Both);
                         socket?.Disconnect(false);
                         socket?.Close();
@@ -280,6 +280,42 @@ namespace Chat.Commuication
         /// <param name="msg"></param>
         public static void SendMsg(string msg) =>
             MessageSendEventHandler?.Invoke(null, new MessageEventArgs(App.Nickname, DateTime.Now, Subject.Msg, msg));
+
+        /// <summary>
+        /// Kick a user async as admin
+        /// </summary>
+        /// <param name="user">The user ip to kick</param>
+        /// <param name="reason">Why will you kick him</param>
+        public static async void KickUsrAsync(string user, string reason)
+        {
+            if (App.IsHost && Clients.ContainsKey(user))
+            {
+                await Task.Run(() =>
+                {
+                    (string username, Socket socket, IAsyncResult proccess, _) = Clients[user];
+                    MessageSendEventHandler?.Invoke(user, new MessageEventArgs(username, DateTime.Now, Subject.Leave, null));
+
+                    // Send kick msg and remove
+                    try { socket?.EndReceive(proccess); }
+                    catch { }
+                    byte[] buffer = new Message
+                    {
+                        Sender = App.Nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Kick,
+                        Content = reason
+                    }.SerializeToByteArray();
+                    socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ar =>
+                    {
+                        socket?.EndSend(ar);
+                        socket?.Shutdown(SocketShutdown.Both);
+                        socket?.Disconnect(false);
+                        socket?.Close();
+                        Clients.Remove(user);
+                    }), socket);
+                });
+            }
+        }
 
         #region Receiving
         private static byte[] _Receivebuffer = new byte[_BufferSize];
@@ -331,7 +367,6 @@ namespace Chat.Commuication
                     case Subject.Kick:
                         if (!App.IsHost)
                         {
-                            Kick:
                             EndAll();
                             Application.Current.Dispatcher.Invoke(() =>
                             {

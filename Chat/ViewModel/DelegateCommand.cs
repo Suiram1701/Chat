@@ -26,7 +26,6 @@ namespace Chat.ViewModel
         /// <param name="execute">Action to run</param>
         public DelegateCommand(Action<object> execute) : this(null, execute)
         {
-
         }
         
         /// <summary>

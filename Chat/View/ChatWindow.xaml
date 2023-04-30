@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:Chat="clr-namespace:Chat"
         xmlns:ViewModel="clr-namespace:Chat.ViewModel"
         xmlns:Model="clr-namespace:Chat.Model"
         xmlns:Convert="clr-namespace:Chat.Resources.Convert"
@@ -47,7 +48,7 @@
 
         <Grid Grid.Row="2" Background="#ededed">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"/>
+                <ColumnDefinition Width="225"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -59,14 +60,17 @@
             <ListView Background="#dedede" BorderThickness="0" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
                       ItemsSource="{Binding Users, Mode=OneWay}" ItemContainerStyle="{StaticResource NotFocuable}">
                 <ListView.ItemTemplate>
-                    <DataTemplate DataType="Model:User">
+                    <DataTemplate DataType="{x:Type Model:User}">
                         <Grid Name="Grid" Height="40" Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType={x:Type ListView}}, Converter={StaticResource ResourceKey=Subtract}, ConverterParameter=35}">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="10"/>
                             </Grid.ColumnDefinitions>
-                            <Border Name="Border" CornerRadius="3" Grid.ColumnSpan="2"/>
+                            <Border Name="Border" CornerRadius="3" Grid.ColumnSpan="4"/>
                             <Label Content="{Binding Name}" Height="30" Width="180" Grid.Column="1" FontSize="13" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            <Button Name="KickBtn" Content="->" ToolTip="Kick user" Command="{Binding DataContext.KickUsrCommand, ElementName=window, Mode=OneWay}" CommandParameter="{Binding IP, Mode=OneTime}" Height="20" Width="20" Grid.Column="2" VerticalContentAlignment="Stretch"/>
                         </Grid>
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsMouseOver, ElementName=Grid}" Value="true">
@@ -78,7 +82,7 @@
             </ListView>
 
             <!-- Messages -->
-            <ListView Name="MsgList" Background="#d3d3d3" BorderThickness="0" Grid.Row="0" Grid.Column="1"
+            <ListView Background="#d3d3d3" BorderThickness="0" Grid.Row="0" Grid.Column="1"
                       ItemsSource="{Binding Messages, Mode=OneWay}" ItemContainerStyle="{StaticResource NotFocuable}">
                 <ListView.ItemTemplate>
                     <DataTemplate DataType="{x:Type Model:Message}">
@@ -95,7 +99,7 @@
                             </Grid.RowDefinitions>
                             <Border Name="Border" CornerRadius="3" Grid.ColumnSpan="3" Grid.RowSpan="2"/>
                             <Label Content="{Binding Sender}" Height="20" Width="190" Grid.Column="1" Grid.Row="0" FontSize="8" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <Label Content="{Binding SendTime, StringFormat=\{0:f\}}" Grid.Row="0" Grid.Column="2" Height="20" Width="auto" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="8"/>
+                            <Label Content="{Binding SendTime, StringFormat=\{0:f\}}" Grid.Row="0" Grid.Column="2" Height="20" Width="auto" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="10"/>
                             <TextBlock x:Name="Content" Text="{Binding Content}" TextWrapping="Wrap" TextAlignment="Left" Height="auto" Width="{Binding Width, ElementName=Grid, Converter={StaticResource ResourceKey=Subtract}, ConverterParameter=15}" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                         </Grid>
                         <DataTemplate.Triggers>
@@ -115,7 +119,7 @@
                 </Grid.ColumnDefinitions>
                 <Label Content="{Binding MessageInputPlaceHolder, Mode=OneWay}" Height="30" Grid.Column="0" FontSize="15" VerticalContentAlignment="Center"/>
                 <TextBox Name="MsgInput" Text="{Binding MessageInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Background="Transparent" Height="25" FontSize="15" Grid.Column="0" VerticalContentAlignment="Center" KeyUp="MsgInput_KeyUp"/>
-                <Button x:Name="SendMsg" Height="25" Width="25" Grid.Column="1" Panel.ZIndex="10" ToolTip="{Binding L_Send, Mode=OneTime}" Command="{Binding SendCommand, Mode=OneWay}">
+                <Button x:Name="SendMsg" Height="25" Width="25" Grid.Column="1" Panel.ZIndex="10" ToolTip="{Binding L_Send, Mode=OneTime}" Command="{Binding SendCommand, Mode=OneWay}" CommandParameter="jiojiojio">
                     <Polyline Points="2,10 20,10 2,4 2,16 20,10" Height="20" Width="20" Stroke="Black" StrokeThickness="1"/>
                 </Button>
             </Grid>
