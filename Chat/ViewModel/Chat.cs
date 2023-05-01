@@ -117,7 +117,6 @@ namespace Chat.ViewModel
                                 Subject = e.Subject,
                                 Content = $"{e.Sender} joined the chat"
                             });
-                            RaisePropertyChanged(nameof(Users));
                             break;
                         case Subject.Leave:
                             Users.Remove(Users.FirstOrDefault(u => u.IP == sender.ToString()));
@@ -128,7 +127,6 @@ namespace Chat.ViewModel
                                 Subject = e.Subject,
                                 Content = $"{e.Sender} left the chat"
                             });
-                            RaisePropertyChanged(nameof(Users));
                             break;
                         case Subject.SyncUsr:
                             // Convert back
@@ -144,10 +142,13 @@ namespace Chat.ViewModel
                             Users.Clear();
                             foreach(User usr in Users)
                                 Users.Add(usr);
-                            RaisePropertyChanged(nameof(Users));
                             break;
                     }
+
+                    s_Chats = Messages;
+                    s_Users = Users;
                     RaisePropertyChanged(nameof(Messages));
+                    RaisePropertyChanged(nameof(Users));
                 });
             };
 
@@ -215,7 +216,6 @@ namespace Chat.ViewModel
             set
             {
                 _Messages = value;
-                s_Chats = value;
                 RaisePropertyChanged();
             }
         }
@@ -230,7 +230,6 @@ namespace Chat.ViewModel
             set
             {
                 _Users = value;
-                s_Users = value;
                 RaisePropertyChanged();
             }
         }
