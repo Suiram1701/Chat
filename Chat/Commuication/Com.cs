@@ -116,7 +116,7 @@ namespace Chat.Commuication
         public static void InitHost()
         {
             App.HostLocalIP = App.LocalOwnIP;
-            App.HostPublicIP = App.LocalOwnIP;
+            App.HostPublicIP = App.OwnIP;
 
             Clients = new Dictionary<string, (string username, Socket connection, IAsyncResult asyncProccess, byte[] buffer)>();
 
@@ -468,10 +468,13 @@ namespace Chat.Commuication
 
                     // Send all chat messages
                     List<Message> messages = ViewModel.Chat.s_Chats.ToList();
-                    byte[] msgBuffer;
                     foreach (Message msg in messages)
                     {
-                        msgBuffer = msg.SerializeToByteArray();
+                        // If system message edit it
+                        if (msg.Subject == Subject.Join || msg.Subject == Subject.Leave)
+                            msg.Sender = msg.Content?.ToString().Split(' ')[0];
+
+                        byte[] msgBuffer = msg.SerializeToByteArray();
                         Clients[sender].connection.Send(msgBuffer, SocketFlags.None);
                     }
 
@@ -479,7 +482,7 @@ namespace Chat.Commuication
                     List<User> users = ViewModel.Chat.s_Users.ToList();
                     StringBuilder formatUsr = new StringBuilder();
                     foreach (User user in users)     // Format to string
-                        formatUsr.Append(user.Name + "," + user.IP);
+                        formatUsr.Append(user.Name + "," + user.IP + " ");
                     byte[] usrBuffer = new Message()
                     {
                         Sender = App.Nickname,
