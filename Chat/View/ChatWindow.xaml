@@ -30,11 +30,13 @@
         <!-- WindowChrome -->
         <Grid Grid.Row="0" MouseDown="WindowChrome_MouseDown">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
             <Label Content="{Binding Title, ElementName=window}" Height="25" Grid.Column="0" Margin="10,-2.5,0,2.5"/>
-            <StackPanel Grid.Column="1" Orientation="Horizontal">
+            <Button Content="{Binding L_ViewInf, Mode=OneTime}" Command="{Binding ViewInfCommand, Mode=OneWay}" Grid.Column="1"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Click="Minimize_Click" Content="_" Style="{StaticResource WindowChrome_SizeButton}"/>
                 <Button Click="Maximize_Click" Content="☐" Style="{StaticResource WindowChrome_SizeButton}"/>
                 <Button Click="Exit_Click" Content="╳" Style="{StaticResource WindowChrome_ExitButton}"/>

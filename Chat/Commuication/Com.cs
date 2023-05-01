@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using System.Windows;
 using static Chat.Properties.Settings;
 using Chat.Model;
@@ -12,6 +11,10 @@ using Chat.Extensions;
 using System.IO;
 using System.Xml.Serialization;
 using Chat.View;
+using Localization;
+using Chat.ViewModel;
+using System.Text;
+using Menu = Chat.View.Menu;
 
 namespace Chat.Commuication
 {
@@ -54,7 +57,8 @@ namespace Chat.Commuication
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
             // Connect
-            Connection.Connect(endPoint);
+            try { Connection.Connect(endPoint); }
+            catch { }
 
             if (Connection.Connected)
             {
@@ -79,19 +83,28 @@ namespace Chat.Commuication
                 };
 
                 // Greet msg
-                byte[] buffer = new Message
+                byte[] greetBuffer = new Message
                 {
                     Sender = App.Nickname,
                     SendTime = DateTime.Now,
                     Subject = Subject.Join,
                     Content = App.Password
                 }.SerializeToByteArray();
-                Connection.Send(buffer);
+                Connection.Send(greetBuffer);
+
+                byte[] buffer = new Message()
+                {
+                    Sender = App.Nickname,
+                    SendTime = DateTime.Now,
+                    Subject = Subject.Sync,
+                    Content = null
+                }.SerializeToByteArray();
+                int bytes = Connection.Send(buffer, SocketFlags.None);
             }
             else
             {
                 EndAll();
-                MessageBox.Show("Cannot connect to the specified IP address!", "No connection!", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(LangHelper.GetString("Com.CantCon"), LangHelper.GetString("Com.NoCon"), MessageBoxButton.OK, MessageBoxImage.Error);
                 new Menu().Show();
                 Application.Current.MainWindow.Close();
             }
@@ -102,6 +115,9 @@ namespace Chat.Commuication
         /// </summary>
         public static void InitHost()
         {
+            App.HostLocalIP = App.LocalOwnIP;
+            App.HostPublicIP = App.LocalOwnIP;
+
             Clients = new Dictionary<string, (string username, Socket connection, IAsyncResult asyncProccess, byte[] buffer)>();
 
             // Setup local ip bind
@@ -167,7 +183,7 @@ namespace Chat.Commuication
                         Sender = App.Nickname,
                         SendTime = DateTime.Now,
                         Subject = Subject.Kick,
-                        Content = "Your password is incorect!"
+                        Content = LangHelper.GetString("Com.FPasswd")
                     }.SerializeToByteArray();
                     socket.BeginSend(sendBuffer, 0, sendBuffer.Length, SocketFlags.None, new AsyncCallback(sendAr =>
                     {
@@ -186,7 +202,7 @@ namespace Chat.Commuication
                         Sender = App.Nickname,
                         SendTime = DateTime.Now,
                         Subject = Subject.Kick,
-                        Content = "Your nickname is allready choosen! Please choose another nickname."
+                        Content = LangHelper.GetString("Com.FNickn")
                     }.SerializeToByteArray();
                     socket.BeginSend(sendBuffer, 0, sendBuffer.Length, SocketFlags.None, new AsyncCallback(sendAr =>
                     {
@@ -260,7 +276,7 @@ namespace Chat.Commuication
                         Sender = App.Nickname,
                         SendTime = DateTime.Now,
                         Subject = Subject.Kick,
-                        Content = "The host has been shutdown the server!",
+                        Content = LangHelper.GetString("Com.HShutdown")
                     }.SerializeToByteArray();
                     socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ar =>
                     {
@@ -341,7 +357,6 @@ namespace Chat.Commuication
                 catch (Exception)
                 {
                     stream.Dispose();
-                    
                     goto End;
                 }
                 finally { _Receivebuffer = new byte[_BufferSize]; }
@@ -356,8 +371,10 @@ namespace Chat.Commuication
                         System.Diagnostics.Debug.WriteLine($"Client receive: {message.Content} from {message.Sender}");
                         break;
                     case Subject.Sync:
-                        if (App.IsHost)
-                            break;     //TODO: Syncronize
+                        // Get host ip addresses and set them
+                        string[] ips = message.Content.ToString().Split(' ');
+                        App.HostLocalIP = IPAddress.Parse(ips[0]);
+                        App.HostPublicIP = IPAddress.Parse(ips[1]);
                         break;
                     case Subject.Kick:
                         if (!App.IsHost)
@@ -367,7 +384,7 @@ namespace Chat.Commuication
                             {
                                 new Menu().Show();
                                 ChatWindow.Instance.Close();
-                                MessageBox.Show(message.Content?.ToString(), "You was kicked!", MessageBoxButton.OK, MessageBoxImage.None);
+                                MessageBox.Show(message.Content?.ToString(), LangHelper.GetString("Com.Kicked"), MessageBoxButton.OK, MessageBoxImage.None);
                             });
                         }
                         break;
@@ -409,7 +426,6 @@ namespace Chat.Commuication
                 }
                 catch (Exception ex)
                 {
-                    Task.Run(() => MessageBox.Show(ex.Message, "Something went wrong during receiving!", MessageBoxButton.OK, MessageBoxImage.Error));
                     stream.Dispose();
                     goto End;
                 }
@@ -439,8 +455,38 @@ namespace Chat.Commuication
                     System.Diagnostics.Debug.WriteLine($"Host receive: {message.Content}");
                     break;
                 case Subject.Sync:
-                    if (App.IsHost)
-                        break;     //TODO: Syncronize
+                    // Send ip address
+                    byte[] ipSyncBuffer = new Message()
+                    {
+                        Sender = App.Nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Sync,
+                        Content = App.LocalOwnIP.ToString() + App.HostPublicIP.ToString()
+                    }.SerializeToByteArray();
+                    Clients[sender].connection.Send(ipSyncBuffer, SocketFlags.None);
+
+                    // Send all chat messages
+                    List<Message> messages = ViewModel.Chat.s_Chats.ToList();
+                    byte[] msgBuffer;
+                    foreach (Message msg in messages)
+                    {
+                        msgBuffer = msg.SerializeToByteArray();
+                        Clients[sender].connection.Send(msgBuffer, SocketFlags.None);
+                    }
+
+                    // Sync users
+                    List<User> users = ViewModel.Chat.s_Users.ToList();
+                    StringBuilder formatUsr = new StringBuilder();
+                    foreach (User user in users)     // Format to string
+                        formatUsr.Append(user.Name + "," + user.IP);
+                    byte[] usrBuffer = new Message()
+                    {
+                        Sender = App.Nickname,
+                        SendTime = DateTime.Now,
+                        Subject = Subject.SyncUsr,
+                        Content = formatUsr.ToString(),
+                    }.SerializeToByteArray();
+                    Clients[sender].connection.Send(usrBuffer, SocketFlags.None);
                     break;
                 case Subject.Kick:
                     break;

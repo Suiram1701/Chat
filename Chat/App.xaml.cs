@@ -40,6 +40,16 @@ namespace Chat
         /// </summary>
         public static IPAddress LocalOwnIP;
 
+        /// <summary>
+        /// Local ip of the host
+        /// </summary>
+        public static IPAddress HostLocalIP;
+
+        /// <summary>
+        /// Public ip of the host
+        /// </summary>
+        public static IPAddress HostPublicIP;
+
         protected override async void OnStartup(StartupEventArgs e)
         {
             // Check if app is already running

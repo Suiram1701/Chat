@@ -156,6 +156,36 @@
   <data name="ChatWindow.Users" xml:space="preserve">
     <value>Users in Chat:</value>
   </data>
+  <data name="ChatWindow.ViewInf" xml:space="preserve">
+    <value>View connection info</value>
+  </data>
+  <data name="Com.CantCon" xml:space="preserve">
+    <value>Cannot connect to the specified IP address!</value>
+  </data>
+  <data name="Com.FNickn" xml:space="preserve">
+    <value>Your nickname is allready choosen! Please choose another nickname.</value>
+  </data>
+  <data name="Com.FPasswd" xml:space="preserve">
+    <value>Your password is incorect!</value>
+  </data>
+  <data name="Com.HShutdown" xml:space="preserve">
+    <value>The host has been shutdown the server!</value>
+  </data>
+  <data name="Com.Kicked" xml:space="preserve">
+    <value>You was kicked!</value>
+  </data>
+  <data name="Com.NoCon" xml:space="preserve">
+    <value>No connection!</value>
+  </data>
+  <data name="InfWindow.OtherNet" xml:space="preserve">
+    <value>Adresse wenn man in verschiedenen selben Netzwerk ist:</value>
+  </data>
+  <data name="InfWindow.Passwd" xml:space="preserve">
+    <value>Password:</value>
+  </data>
+  <data name="InfWindow.SameNet" xml:space="preserve">
+    <value>Address if you are in the same network:</value>
+  </data>
   <data name="KickDialog.Abort" xml:space="preserve">
     <value>Cancel</value>
   </data>

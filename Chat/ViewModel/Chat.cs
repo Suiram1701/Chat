@@ -2,6 +2,7 @@
 using Chat.Model;
 using Chat.View;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -14,6 +15,16 @@ namespace Chat.ViewModel
     /// </summary>
     internal class Chat : ViewModelBase
     {
+        /// <summary>
+        /// All chat msgs as static
+        /// </summary>
+        public static IEnumerable<Message> s_Chats;
+
+        /// <summary>
+        /// All users as static
+        /// </summary>
+        public static IEnumerable<User> s_Users;
+
         #region Localization
         /// <summary>
         /// Window title for this window
@@ -39,6 +50,8 @@ namespace Chat.ViewModel
         /// Message input placeholder
         /// </summary>
         public string L_Msg => GetString("ChatWindow.MsgInputPh");
+
+        public string L_ViewInf => GetString("ChatWindow.ViewInf");
         #endregion
 
         public Chat()
@@ -72,6 +85,8 @@ namespace Chat.ViewModel
                 if (dialog.ShowDialog() == true)
                     Com.KickUsr((string)parameter, dialog.Reason);
             });
+
+            ViewInfCommand = new DelegateCommand(parameter => new ShowInfDialog(App.HostLocalIP?.ToString() ?? "",App.HostPublicIP?.ToString() ?? "", App.Password).Show());
 
             // Setup chat
             Com.MessageReceivedEventHandler += (sender, e) =>
@@ -115,6 +130,22 @@ namespace Chat.ViewModel
                             });
                             RaisePropertyChanged(nameof(Users));
                             break;
+                        case Subject.SyncUsr:
+                            // Convert back
+                            IEnumerable<User> users = e.Message.Split(' ').Select(str =>
+                            {
+                                string[] parts = str.Split(',');
+                                return new User()
+                                {
+                                    Name = parts[0],
+                                    IP = parts[1]
+                                };
+                            });
+                            Users.Clear();
+                            foreach(User usr in Users)
+                                Users.Add(usr);
+                            RaisePropertyChanged(nameof(Users));
+                            break;
                     }
                     RaisePropertyChanged(nameof(Messages));
                 });
@@ -127,7 +158,7 @@ namespace Chat.ViewModel
                 Users.Add(new User()
                 {
                     Name = App.Nickname,
-                    IP = App.LocalOwnIP.ToString()
+                    IP = App.LocalOwnIP?.ToString()
                 });
                 RaisePropertyChanged(nameof(Users));
             }
@@ -143,6 +174,11 @@ namespace Chat.ViewModel
         /// A command for the admin to kick a user
         /// </summary>
         public DelegateCommand KickUsrCommand { get; }
+
+        /// <summary>
+        /// View connection infos
+        /// </summary>
+        public DelegateCommand ViewInfCommand { get; }
 
         // Data
         /// <summary>
@@ -179,6 +215,7 @@ namespace Chat.ViewModel
             set
             {
                 _Messages = value;
+                s_Chats = value;
                 RaisePropertyChanged();
             }
         }
@@ -193,6 +230,7 @@ namespace Chat.ViewModel
             set
             {
                 _Users = value;
+                s_Users = value;
                 RaisePropertyChanged();
             }
         }

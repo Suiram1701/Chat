@@ -33,6 +33,7 @@ namespace Chat.Model
         Msg = 2,
         Sync = 3,
         Kick = 4,
+        SyncUsr = 5,
     }
 
     public class Message
