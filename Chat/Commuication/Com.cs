@@ -394,8 +394,7 @@ namespace Chat.Commuication
             }
 
             End:
-            IAsyncResult proccess = Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
-            Clients[sender] = (Clients[sender].username, Clients[sender].connection, proccess, Clients[sender].buffer);
+            _ConnectionAsyncProccess = Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
         }
 
         /// <summary>
