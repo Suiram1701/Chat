@@ -338,8 +338,10 @@ namespace Chat.Commuication
         private static void ReceivingAsyncClient(IAsyncResult ar)
         {
             string sender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).Address.ToString();
-
-            int bytes = Connection?.EndReceive(ar) ?? 0;
+            int bytes;
+            
+            try { bytes = Connection?.EndReceive(ar) ?? 0; }
+            catch { bytes = 0; }
 
             if (bytes <= 0)
                 goto End;
