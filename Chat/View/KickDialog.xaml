@@ -1,0 +1,27 @@
+﻿<Window x:Class="Chat.View.KickDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="{Binding L_Title}" Height="135" Width="400" ResizeMode="NoResize">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="160"/>
+            <ColumnDefinition Width="15"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="{Binding L_Reason, Mode=OneTime}" VerticalAlignment="Bottom"/>
+        <TextBox Text="{Binding Reason, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" FontSize="20" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1">
+            <Button Click="Kick_Click" Content="{Binding L_OK, Mode=OneTime}" Width="80"/>
+            <Button Click="Cancel_Click" Content="{Binding L_Abort, Mode=OneTime}" Width="80"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -156,6 +156,18 @@
   <data name="ChatWindow.Users" xml:space="preserve">
     <value>Users in Chat:</value>
   </data>
+  <data name="KickDialog.Abort" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="KickDialog.OK" xml:space="preserve">
+    <value>Kick</value>
+  </data>
+  <data name="KickDialog.Reason" xml:space="preserve">
+    <value>Reason:</value>
+  </data>
+  <data name="KickDialog.Title" xml:space="preserve">
+    <value>Kick {0}</value>
+  </data>
   <data name="MenuWindow.IPadJoin" xml:space="preserve">
     <value>IP address to join:</value>
   </data>

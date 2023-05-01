@@ -286,34 +286,29 @@ namespace Chat.Commuication
         /// </summary>
         /// <param name="user">The user ip to kick</param>
         /// <param name="reason">Why will you kick him</param>
-        public static async void KickUsrAsync(string user, string reason)
+        public static void KickUsr(string user, string reason)
         {
             if (App.IsHost && Clients.ContainsKey(user))
             {
-                await Task.Run(() =>
-                {
-                    (string username, Socket socket, IAsyncResult proccess, _) = Clients[user];
-                    MessageSendEventHandler?.Invoke(user, new MessageEventArgs(username, DateTime.Now, Subject.Leave, null));
+                (string username, Socket socket, IAsyncResult proccess, _) = Clients[user];
 
-                    // Send kick msg and remove
-                    try { socket?.EndReceive(proccess); }
-                    catch { }
-                    byte[] buffer = new Message
-                    {
-                        Sender = App.Nickname,
-                        SendTime = DateTime.Now,
-                        Subject = Subject.Kick,
-                        Content = reason
-                    }.SerializeToByteArray();
-                    socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(ar =>
-                    {
-                        socket?.EndSend(ar);
-                        socket?.Shutdown(SocketShutdown.Both);
-                        socket?.Disconnect(false);
-                        socket?.Close();
-                        Clients.Remove(user);
-                    }), socket);
-                });
+                // Send kick msg and remove
+                byte[] buffer = new Message
+                {
+                    Sender = App.Nickname,
+                    SendTime = DateTime.Now,
+                    Subject = Subject.Kick,
+                    Content = reason
+                }.SerializeToByteArray();
+                socket.Send(buffer, SocketFlags.None);
+                try { socket?.EndReceive(proccess); }
+                catch { }
+                socket?.Shutdown(SocketShutdown.Both);
+                socket?.Disconnect(false);
+                socket?.Close();
+                Clients.Remove(user);
+
+                MessageReceivedEventHandler?.Invoke(user, new MessageEventArgs(username, DateTime.Now, Subject.Leave, null));
             }
         }
 
@@ -380,7 +375,8 @@ namespace Chat.Commuication
             }
 
             End:
-            Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
+            IAsyncResult proccess = Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
+            Clients[sender] = (Clients[sender].username, Clients[sender].connection, proccess, Clients[sender].buffer);
         }
 
         /// <summary>
@@ -451,7 +447,8 @@ namespace Chat.Commuication
             }
 
         End:
-            Clients[sender].connection?.BeginReceive(Clients[sender].buffer, 0, Clients[sender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), Clients[sender].connection);
+            IAsyncResult proccess = Clients[sender].connection?.BeginReceive(Clients[sender].buffer, 0, Clients[sender].buffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncHost), Clients[sender].connection);
+            Clients[sender] = (Clients[sender].username, Clients[sender].connection, proccess, Clients[sender].buffer);
         }
         #endregion
     }

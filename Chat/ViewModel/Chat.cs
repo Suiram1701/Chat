@@ -2,9 +2,7 @@
 using Chat.Model;
 using Chat.View;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using static Localization.LangHelper;
@@ -66,10 +64,13 @@ namespace Chat.ViewModel
 
             KickUsrCommand = new DelegateCommand(parameter => App.IsHost, parameter =>
             {
-                // Reason dialog
-                string reason = null;
+                if (!Com.Clients.ContainsKey((string)parameter))
+                    return;
 
-                Com.KickUsrAsync((string)parameter, reason);
+                // Reason dialog
+                KickDialog dialog = new KickDialog(Com.Clients[(string)parameter].username);
+                if (dialog.ShowDialog() == true)
+                    Com.KickUsr((string)parameter, dialog.Reason);
             });
 
             // Setup chat
