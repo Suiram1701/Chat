@@ -76,6 +76,14 @@
                             <DataTrigger Binding="{Binding IsMouseOver, ElementName=Grid}" Value="true">
                                 <Setter TargetName="Border" Property="Background" Value="#c4c4c4"/>
                             </DataTrigger>
+                            <MultiDataTrigger>
+                            </MultiDataTrigger>
+                            <DataTrigger Binding="{x:Static Chat:App.IsHost}" Value="false">
+                                <Setter TargetName="KickBtn" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IP}" Value="{x:Static Chat:App.LocalOwnIP}">
+                                <Setter TargetName="KickBtn" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
                         </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListView.ItemTemplate>
