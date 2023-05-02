@@ -177,6 +177,9 @@
   <data name="Com.NoCon" xml:space="preserve">
     <value>No connection!</value>
   </data>
+  <data name="ConnectingDialog.Title" xml:space="preserve">
+    <value>Connecting to {0}</value>
+  </data>
   <data name="InfWindow.Address" xml:space="preserve">
     <value>Address:</value>
   </data>

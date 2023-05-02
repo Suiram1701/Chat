@@ -15,6 +15,7 @@ using Localization;
 using Chat.ViewModel;
 using System.Text;
 using Menu = Chat.View.Menu;
+using System.Threading.Tasks;
 
 namespace Chat.Commuication
 {
@@ -51,17 +52,21 @@ namespace Chat.Commuication
         /// Initalize the connection for the client
         /// </summary>
         /// <param name="address">Address to join</param>
-        public static void InitClient(IPAddress address)
+        /// <param name="dialog">The wait dialog while connecting</param>
+        public static async Task InitClientAsync(IPAddress address, ConnectingDialog dialog)
         {
             IPEndPoint endPoint = new IPEndPoint(address, Default.DefaultPort);
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
             // Connect
-            try { Connection.Connect(endPoint); }
+            await Task.Run(() => dialog.Show());
+            try { await Connection.ConnectAsync(endPoint); }
             catch { }
 
             if (Connection.Connected)
             {
+                dialog.Close();
+
                 // Add reciving
                 IAsyncResult proccess = Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
                 _ConnectionAsyncProccess = proccess;

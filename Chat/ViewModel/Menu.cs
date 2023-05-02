@@ -77,12 +77,12 @@ namespace Chat.ViewModel
 
             NewHistoryCommand = new DelegateCommand(parameter => !string.IsNullOrEmpty(SelectedFile), parameter => SelectedFile = string.Empty);
 
-            JoinChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)) && !HasError(nameof(Password)) && !HasError(nameof(JoinIP)), parameter =>
+            JoinChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)) && !HasError(nameof(Password)) && !HasError(nameof(JoinIP)),async parameter =>
             {
                 App.Nickname = Nickname;
                 App.Password = Password;
                 App.IsHost = false;
-                Com.InitClient(IPAddress.Parse(JoinIP));
+                await Com.InitClientAsync(IPAddress.Parse(JoinIP), new ConnectingDialog(JoinIP));
                 new ChatWindow().Show();
                 Application.Current.MainWindow.Close();
             });
