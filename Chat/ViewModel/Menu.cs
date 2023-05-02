@@ -82,7 +82,7 @@ namespace Chat.ViewModel
                 App.Nickname = Nickname;
                 App.Password = Password;
                 App.IsHost = false;
-                await Com.InitClientAsync(IPAddress.Parse(JoinIP), new ConnectingDialog(JoinIP));
+                await Com.InitClientAsync(IPAddress.Parse(JoinIP));
                 new ChatWindow().Show();
                 Application.Current.MainWindow.Close();
             });

@@ -53,20 +53,17 @@ namespace Chat.Commuication
         /// </summary>
         /// <param name="address">Address to join</param>
         /// <param name="dialog">The wait dialog while connecting</param>
-        public static async Task InitClientAsync(IPAddress address, ConnectingDialog dialog)
+        public static async Task InitClientAsync(IPAddress address)
         {
             IPEndPoint endPoint = new IPEndPoint(address, Default.DefaultPort);
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
             // Connect
-            await Task.Run(() => dialog.Show());
             try { await Connection.ConnectAsync(endPoint); }
             catch { }
 
             if (Connection.Connected)
             {
-                dialog.Close();
-
                 // Add reciving
                 IAsyncResult proccess = Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
                 _ConnectionAsyncProccess = proccess;
