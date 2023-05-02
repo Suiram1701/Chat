@@ -250,7 +250,11 @@ namespace Chat.Commuication
             try
             {
                 if (App.IsHost)
+                {
                     Connection?.EndAccept(_ConnectionAsyncProccess);
+                    Connection?.Close();
+                    Connection = null;
+                }
                 else
                 {
                     byte[] buffer = new Message()
@@ -262,16 +266,11 @@ namespace Chat.Commuication
                     }.SerializeToByteArray();
                     Connection?.Send(buffer, SocketFlags.None);
                     Connection?.EndReceive(_ConnectionAsyncProccess);
+                    Connection?.Shutdown(SocketShutdown.Both);
+                    Connection?.Disconnect(false);
                 }
             }
             catch { }
-            if (!App.IsHost)
-            {
-                Connection?.Shutdown(SocketShutdown.Both);
-                Connection?.Disconnect(false);
-            }
-            Connection?.Close();
-            Connection = null;
 
             if (App.IsHost)
             {
