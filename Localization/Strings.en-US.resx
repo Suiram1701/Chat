@@ -177,14 +177,11 @@
   <data name="Com.NoCon" xml:space="preserve">
     <value>No connection!</value>
   </data>
-  <data name="InfWindow.OtherNet" xml:space="preserve">
-    <value>Adresse wenn man in verschiedenen selben Netzwerk ist:</value>
+  <data name="InfWindow.Address" xml:space="preserve">
+    <value>Address:</value>
   </data>
   <data name="InfWindow.Passwd" xml:space="preserve">
     <value>Password:</value>
-  </data>
-  <data name="InfWindow.SameNet" xml:space="preserve">
-    <value>Address if you are in the same network:</value>
   </data>
   <data name="KickDialog.Abort" xml:space="preserve">
     <value>Cancel</value>

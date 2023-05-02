@@ -13,10 +13,7 @@ namespace Chat.View
             LangHelper.GetString("ChatWindow.ViewInf");
 
         public string L_SameNet =>
-            LangHelper.GetString("InfWindow.SameNet");
-
-        public string L_OtherNet =>
-            LangHelper.GetString("InfWindow.OtherNet");
+            LangHelper.GetString("InfWindow.Address");
 
         public string L_Passwd =>
             LangHelper.GetString("InfWindow.Passwd");
@@ -24,14 +21,11 @@ namespace Chat.View
 
         public string LocalIP { get; }
 
-        public string PublicIP { get; }
-
         public string Passwd { get; }
 
-        public ShowInfDialog(string localIP, string publicIP, string passwd)
+        public ShowInfDialog(string localIP, string passwd)
         {
             LocalIP = localIP;
-            PublicIP = publicIP;
             Passwd = passwd;
 
             InitializeComponent();

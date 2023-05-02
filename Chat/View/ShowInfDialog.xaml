@@ -5,24 +5,22 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
-        Title="{Binding L_Title}" Height="188" Width="565" ResizeMode="NoResize">
+        Title="{Binding L_Title}" Height="150" Width="250" ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="40"/>
             <RowDefinition Height="40"/>
-            <RowDefinition Height="40"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="100"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <TextBlock Text="Adresse wenn man im selben Netzwerk ist:" FontSize="12" TextWrapping="Wrap" Grid.Row="0" Grid.Column="0"/>
-        <TextBlock Text="{Binding LocalIP}" FontSize="12" Grid.Row="0" Grid.Column="1"/>
-        <TextBlock Text="Adresse wenn man in verschiedenen selben Netzwerk ist:" FontSize="12" TextWrapping="Wrap" Grid.Row="1" Grid.Column="0"/>
-        <TextBlock Text="{Binding PublicIP}" FontSize="12" Grid.Row="1" Grid.Column="1"/>
-        <TextBlock Text="Password:" FontSize="12" Grid.Row="2" TextWrapping="Wrap" Grid.Column="0"/>
-        <TextBlock Text="{Binding Passwd}" FontSize="12" Grid.Row="2" Grid.Column="1"/>
-        <Button Click="OK_Click" Content="OK" Grid.Row="3" Grid.Column="1" Height="25" Width="80" HorizontalAlignment="Right" VerticalAlignment="Top"/>
+        <TextBlock Text="{Binding L_SameNet, Mode=OneTime}" FontSize="12" TextWrapping="Wrap" Grid.Row="0" Grid.Column="1"/>
+        <TextBlock Text="{Binding LocalIP, Mode=OneTime}" FontSize="12" Grid.Row="0" Grid.Column="2"/>
+        <TextBlock Text="{Binding L_Passwd, Mode=OneTime}" FontSize="12" Grid.Row="1" TextWrapping="Wrap" Grid.Column="1"/>
+        <TextBlock Text="{Binding Passwd, Mode=OneTime}" FontSize="12" Grid.Row="1" Grid.Column="2"/>
+        <Button Click="OK_Click" Content="OK" Grid.Row="2" Grid.Column="2" Height="25" Width="80" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,20,0"/>
     </Grid>
 </Window>

@@ -86,7 +86,7 @@ namespace Chat.ViewModel
                     Com.KickUsr((string)parameter, dialog.Reason);
             });
 
-            ViewInfCommand = new DelegateCommand(parameter => new ShowInfDialog(App.HostLocalIP?.ToString() ?? "",App.HostPublicIP?.ToString() ?? "", App.Password).Show());
+            ViewInfCommand = new DelegateCommand(parameter => new ShowInfDialog(App.HostLocalIP?.ToString() ?? "", App.Password).Show());
 
             // Setup chat
             Com.MessageReceivedEventHandler += (sender, e) =>

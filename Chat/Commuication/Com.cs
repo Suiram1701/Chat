@@ -116,7 +116,6 @@ namespace Chat.Commuication
         public static void InitHost()
         {
             App.HostLocalIP = App.LocalOwnIP;
-            App.HostPublicIP = App.OwnIP;
 
             Clients = new Dictionary<string, (string username, Socket connection, IAsyncResult asyncProccess, byte[] buffer)>();
 
@@ -127,6 +126,15 @@ namespace Chat.Commuication
             Connection.Listen(10);
             IAsyncResult proccess = Connection.BeginAccept(new AsyncCallback(AcceptClient), Connection);
             _ConnectionAsyncProccess = proccess;
+            /*
+            IPEndPoint end = new IPEndPoint(App.OwnIP, Default.DefaultPort);
+            Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            s.Bind(end);
+            s.Listen(10);
+            s.BeginAccept(new AsyncCallback(ar =>
+            {
+                s.EndAccept(ar);
+            }), s);*/
 
             // Setup sending
             MessageSendEventHandler += (sender, e) =>
@@ -376,7 +384,6 @@ namespace Chat.Commuication
                         // Get host ip addresses and set them
                         string[] ips = message.Content.ToString().Split(' ');
                         App.HostLocalIP = IPAddress.Parse(ips[0]);
-                        App.HostPublicIP = IPAddress.Parse(ips[1]);
                         break;
                     case Subject.Kick:
                         if (!App.IsHost)
@@ -462,7 +469,7 @@ namespace Chat.Commuication
                         Sender = App.Nickname,
                         SendTime = DateTime.Now,
                         Subject = Subject.Sync,
-                        Content = App.LocalOwnIP.ToString() + " " + App.HostPublicIP.ToString()
+                        Content = App.LocalOwnIP.ToString()
                     }.SerializeToByteArray();
                     Clients[sender].connection.Send(ipSyncBuffer, SocketFlags.None);
 

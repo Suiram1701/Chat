@@ -31,11 +31,6 @@ namespace Chat
         public static string Password;
 
         /// <summary>
-        /// IP of the running pc
-        /// </summary>
-        public static IPAddress OwnIP;
-
-        /// <summary>
         /// Local ip of the running pc
         /// </summary>
         public static IPAddress LocalOwnIP;
@@ -44,11 +39,6 @@ namespace Chat
         /// Local ip of the host
         /// </summary>
         public static IPAddress HostLocalIP;
-
-        /// <summary>
-        /// Public ip of the host
-        /// </summary>
-        public static IPAddress HostPublicIP;
 
         protected override async void OnStartup(StartupEventArgs e)
         {
@@ -94,34 +84,6 @@ namespace Chat
                 {
                     ping.Dispose();
                     Shutdown();
-                }
-            }
-
-            // Get own public ip
-            using (WebClient client = new WebClient())
-            {
-                try
-                {
-                    string data = await client.DownloadStringTaskAsync("http://checkip.dyndns.org");
-                    string ipString = Regex.Match(data, @"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}").Value;
-                    if (!IPAddress.TryParse(ipString, out IPAddress ip))
-                        throw new InvalidCastException(ipString);
-
-                    OwnIP = ip;
-                }
-                catch (WebException ex)     // Error while connecting to website
-                {
-                    client.Dispose();
-                    MessageBox.Show(LangHelper.GetString("App.PIPErr") + $" Details: {ex.Status}, {ex.Response}", ex.Message, MessageBoxButton.OK, MessageBoxImage.Error);
-                    Shutdown();
-                    return;
-                }
-                catch (InvalidCastException ex)
-                {
-                    client.Dispose();
-                    MessageBox.Show(LangHelper.GetString("App.InvIPErr") + $": {ex.Message}", LangHelper.GetString("App.InvIPErr") + "!", MessageBoxButton.OK, MessageBoxImage.Error);
-                    Shutdown();
-                    return;
                 }
             }
 
