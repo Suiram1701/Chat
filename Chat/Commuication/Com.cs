@@ -52,14 +52,13 @@ namespace Chat.Commuication
         /// Initalize the connection for the client
         /// </summary>
         /// <param name="address">Address to join</param>
-        /// <param name="dialog">The wait dialog while connecting</param>
-        public static async Task InitClientAsync(IPAddress address)
+        public static void InitClient(IPAddress address)
         {
             IPEndPoint endPoint = new IPEndPoint(address, Default.DefaultPort);
             Connection = new Socket(SocketType.Stream, ProtocolType.Tcp);
 
             // Connect
-            try { await Connection.ConnectAsync(endPoint); }
+            try { Connection.ConnectAsync(endPoint); }
             catch { }
 
             if (Connection.Connected)
