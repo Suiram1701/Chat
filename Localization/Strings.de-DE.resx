@@ -118,147 +118,147 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="App.InvIPErr" xml:space="preserve">
-    <value>Invalid IP adress</value>
+    <value>Ungültige IP Adresse</value>
   </data>
   <data name="App.NetConErr" xml:space="preserve">
-    <value>Network connection error!</value>
+    <value>Netzwerk verbindungs Fehler</value>
   </data>
   <data name="App.NetConTimeoutErr" xml:space="preserve">
-    <value>Your network ping is with {0}ms (maximum are {1}ms) too high for using this chat!</value>
+    <value>Dein Netzwerk-Ping ist mit {0}ms (maximal {1}ms) zu hoch um diesen Chat zu nutzen!</value>
   </data>
   <data name="App.NoNetConErr" xml:space="preserve">
-    <value>You need a network connection to use this chat!</value>
+    <value>Sie benötigen eine Netzwerkverbindung, um diesen Chat zu nutzen!</value>
   </data>
   <data name="App.OtherNetErr" xml:space="preserve">
-    <value>A {0} error has occurred!</value>
+    <value>Ein {0}-Fehler ist aufgetreten!</value>
   </data>
   <data name="App.RunErr" xml:space="preserve">
-    <value>The application is already running. You can't start this application a second time.</value>
+    <value>Die Anwendung wird bereits ausgeführt. Sie können diese Anwendung kein zweites Mal starten.</value>
   </data>
   <data name="App.RunErrTitle" xml:space="preserve">
-    <value>Application is already running!</value>
+    <value>Die Anwendung läuft bereits!</value>
   </data>
   <data name="ChatWindow.ChatHistory" xml:space="preserve">
-    <value>Chat History:</value>
+    <value>Chatverlauf:</value>
   </data>
   <data name="ChatWindow.MsgInputPh" xml:space="preserve">
-    <value>Message</value>
+    <value>Nachricht</value>
   </data>
   <data name="ChatWindow.Send" xml:space="preserve">
-    <value>Send</value>
+    <value>Senden</value>
   </data>
   <data name="ChatWindow.Title" xml:space="preserve">
     <value>Chat</value>
   </data>
   <data name="ChatWindow.Users" xml:space="preserve">
-    <value>Users in Chat:</value>
+    <value>Benutzer im Chat:</value>
   </data>
   <data name="ChatWindow.ViewInf" xml:space="preserve">
-    <value>View connection info</value>
+    <value>Verbindungsinformationen anzeigen</value>
   </data>
   <data name="Com.CantCon" xml:space="preserve">
-    <value>Cannot connect to the specified IP address!</value>
+    <value>Es kann keine Verbindung zur angegebenen IP-Adresse hergestellt werden!</value>
   </data>
   <data name="Com.FNickn" xml:space="preserve">
-    <value>Your nickname is already chosen! Please choose another nickname.</value>
+    <value>Dein Nutzername ist bereits gewählt! Bitte wählen Sie einen anderen Nutzername.</value>
   </data>
   <data name="Com.FPasswd" xml:space="preserve">
-    <value>Your password is incorrect!</value>
+    <value>Dein Passwort ist falsch!</value>
   </data>
   <data name="Com.HShutdown" xml:space="preserve">
-    <value>The host has been shutdown the server!</value>
+    <value>Der Host hat den Server heruntergefahren!</value>
   </data>
   <data name="Com.Kicked" xml:space="preserve">
-    <value>You was kicked!</value>
+    <value>Du wurdest gekicked!</value>
   </data>
   <data name="Com.NoCon" xml:space="preserve">
-    <value>No connection!</value>
+    <value>Keine Verbindung!</value>
   </data>
   <data name="InfWindow.Address" xml:space="preserve">
-    <value>Address:</value>
+    <value>Adresse:</value>
   </data>
   <data name="InfWindow.Passwd" xml:space="preserve">
-    <value>Password:</value>
+    <value>Passwort:</value>
   </data>
   <data name="KickDialog.Abort" xml:space="preserve">
-    <value>Cancel</value>
+    <value>Abbrechen</value>
   </data>
   <data name="KickDialog.OK" xml:space="preserve">
     <value>Kick</value>
   </data>
   <data name="KickDialog.Reason" xml:space="preserve">
-    <value>Reason:</value>
+    <value>Grund:</value>
   </data>
   <data name="KickDialog.Title" xml:space="preserve">
     <value>Kick {0}</value>
   </data>
   <data name="MenuWindow.IPadJoin" xml:space="preserve">
-    <value>IP address to join:</value>
+    <value>IP-Adresse zum Beitreten:</value>
   </data>
   <data name="MenuWindow.JChat" xml:space="preserve">
-    <value>Join a Chat</value>
+    <value>Tritt einem Chat bei</value>
   </data>
   <data name="MenuWindow.JChatBtn" xml:space="preserve">
-    <value>Join Chat</value>
+    <value>Chat beitreten</value>
   </data>
   <data name="MenuWindow.LoadsChath" xml:space="preserve">
-    <value>Load saved Chat history</value>
+    <value>Gespeicherten Chat-Verlauf laden</value>
   </data>
   <data name="MenuWindow.NChat" xml:space="preserve">
-    <value>New Chat</value>
+    <value>Neuer Chat</value>
   </data>
   <data name="MenuWindow.NChath" xml:space="preserve">
-    <value>New Chat history</value>
+    <value>Neuer Chatverlauf</value>
   </data>
   <data name="MenuWindow.NiNameInput" xml:space="preserve">
-    <value>Display Name:</value>
+    <value>Anzeigename:</value>
   </data>
   <data name="MenuWindow.PasswdInput" xml:space="preserve">
-    <value>Password:</value>
+    <value>Passwort:</value>
   </data>
   <data name="MenuWindow.SChat" xml:space="preserve">
-    <value>Start Chat:</value>
+    <value>Chat beginnen:</value>
   </data>
   <data name="MenuWindow.Title" xml:space="preserve">
     <value>Menu</value>
   </data>
   <data name="MenuWindow.ValiErr.FLetter" xml:space="preserve">
-    <value>{0} isn't a valid letter!</value>
+    <value>{0} ist kein gültiger Buchstabe!</value>
   </data>
   <data name="MenuWindow.ValiErr.FLetters" xml:space="preserve">
-    <value>{0} aren't valid letters!</value>
+    <value>{0} sind keine gültigen Buchstaben!</value>
   </data>
   <data name="MenuWindow.ValiErr.JIPInv" xml:space="preserve">
-    <value>Invalid IP address!</value>
+    <value>Ungültige IP-Adresse!</value>
   </data>
   <data name="MenuWindow.ValiErr.JIPOwn" xml:space="preserve">
-    <value>You can't use your own IP address!</value>
+    <value>Sie können nicht Ihre eigene IP-Adresse verwenden!</value>
   </data>
   <data name="MenuWindow.ValiErr.LF" xml:space="preserve">
-    <value>Letters Left: {0}</value>
+    <value>Verbleibende Buchstaben: {0}</value>
   </data>
   <data name="MenuWindow.ValiErr.MaxLet" xml:space="preserve">
-    <value>Maximum letters reached! (Maximum 100)</value>
+    <value>Maximale Buchstabenanzahl erreicht! (Maximal 100)</value>
   </data>
   <data name="MenuWindow.ValiErr.MaxLetR" xml:space="preserve">
-    <value>Maximum letters reached!</value>
+    <value>Maximale Buchstabenanzahl erreicht!</value>
   </data>
   <data name="MenuWindow.ValiErr.NContent" xml:space="preserve">
-    <value>Field cannot be empty!</value>
+    <value>Feld darf nicht leer sein!</value>
   </data>
   <data name="MenuWindow.ValiErr.NoSpaces" xml:space="preserve">
-    <value>Must not contain spaces!</value>
+    <value>Darf keine Leerzeichen enthalten!</value>
   </data>
   <data name="MenuWindow.ValiErr.PasswdMin" xml:space="preserve">
-    <value>The password need at least 8 letters!</value>
+    <value>Das Passwort muss mindestens 8 Buchstaben lang sein!</value>
   </data>
   <data name="ChatWindow.Save" xml:space="preserve">
-    <value>Save chat history</value>
+    <value>Chatverlauf speichern</value>
   </data>
   <data name="ChatWindow.Join" xml:space="preserve">
-    <value>{0} joined the chat</value>
+    <value>{0} ist dem Chat beigetreten</value>
   </data>
   <data name="ChatWindow.Leave" xml:space="preserve">
-    <value>{0} left the chat</value>
+    <value>{0} hat den Chat verlassen</value>
   </data>
 </root>

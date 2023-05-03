@@ -115,7 +115,7 @@ namespace Chat.ViewModel
                                 Sender = "System",
                                 SendTime = e.SendTime,
                                 Subject = e.Subject,
-                                Content = $"{e.Sender} joined the chat"
+                                Content = GetString("ChatWindow.Join", e.Sender)
                             });
                             break;
                         case Subject.Leave:
@@ -125,7 +125,7 @@ namespace Chat.ViewModel
                                 Sender = "System",
                                 SendTime = e.SendTime,
                                 Subject = e.Subject,
-                                Content = $"{e.Sender} left the chat"
+                                Content = GetString("ChatWindow.Leave", e.Sender)
                             });
                             break;
                         case Subject.SyncUsr:

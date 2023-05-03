@@ -96,9 +96,6 @@
     <Compile Include="View\ChatWindow.xaml.cs">
       <DependentUpon>ChatWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\ConnectingDialog.xaml.cs">
-      <DependentUpon>ConnectingDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\KickDialog.xaml.cs">
       <DependentUpon>KickDialog.xaml</DependentUpon>
     </Compile>
@@ -140,10 +137,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\ChatWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\ConnectingDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
