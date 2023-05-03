@@ -1,12 +1,18 @@
 ﻿using Chat.Commuication;
+using Chat.Model;
 using Chat.View;
 using Localization;
 using Microsoft.Win32;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Security.RightsManagement;
 using System.Text;
 using System.Windows;
+using System.Windows.Documents;
+using System.Xml;
+using System.Xml.Serialization;
 using static Chat.Properties.Settings;
 
 namespace Chat.ViewModel
@@ -45,7 +51,7 @@ namespace Chat.ViewModel
                 App.Password = Password;
                 App.IsHost = true;
                 Com.InitHost();
-                new ChatWindow().Show();
+                new View.ChatWindow().Show();
                 Application.Current.MainWindow.Close();
             });
 
@@ -54,8 +60,8 @@ namespace Chat.ViewModel
                 // Select file
                 OpenFileDialog ofd = new OpenFileDialog
                 {
-                    Title = "Select saved chat history",
-                    Filter = "Chat history file (*.chat)|*.chat",
+                    Title = LangHelper.GetString("Menu.SHFile"),
+                    Filter = LangHelper.GetString("Menu.HistoryFile"),
                     CheckFileExists = true,
                     Multiselect = false
                 };
@@ -64,14 +70,29 @@ namespace Chat.ViewModel
                 {
                     string fileName = ofd.FileName.Substring(ofd.FileName.LastIndexOf('\\') + 1);
 
-                    //TODO: Check if file is a valid file
-                    if (false)
+                    // Check if the file is serialiable
+                    bool fileSerializable = true;
+                    using (Stream stream = ofd.OpenFile())
                     {
-                        MessageBox.Show($"The file {fileName} isn't a valid chat history file!", "Not valid file selected!", MessageBoxButton.OK, MessageBoxImage.Error);
-                        return;
+                        try
+                        {
+                            _ = new XmlSerializer(typeof(List<Message>)).Deserialize(stream);
+                        }
+                        catch
+                        {
+                            stream.Dispose();
+                            fileSerializable = false;
+                        }
+                       
                     }
 
-                    SelectedFile = ofd.FileName;
+                    if (!fileSerializable)
+                    {
+                        MessageBox.Show(LangHelper.GetString("Menu.Err.NVFile"), LangHelper.GetString("Menu.Err.NVFileTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                    else
+                        SelectedFile = ofd.FileName;
                 }
             });
 
@@ -83,7 +104,7 @@ namespace Chat.ViewModel
                 App.Password = Password;
                 App.IsHost = false;
                 Com.InitClient(IPAddress.Parse(JoinIP));
-                new ChatWindow().Show();
+                new View.ChatWindow().Show();
                 Application.Current.MainWindow.Close();
             });
         }
