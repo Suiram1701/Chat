@@ -1,11 +1,15 @@
 ﻿using Chat.Commuication;
 using Chat.Model;
 using Chat.View;
+using Localization;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Xml.Serialization;
 using static Localization.LangHelper;
 
 namespace Chat.ViewModel
@@ -13,7 +17,7 @@ namespace Chat.ViewModel
     /// <summary>
     /// Viewmodel for Chat window
     /// </summary>
-    internal class Chat : ViewModelBase
+    internal class ChatWindow : ViewModelBase
     {
         /// <summary>
         /// All chat msgs as static
@@ -51,10 +55,18 @@ namespace Chat.ViewModel
         /// </summary>
         public string L_Msg => GetString("ChatWindow.MsgInputPh");
 
+        /// <summary>
+        /// View connection information button
+        /// </summary>
         public string L_ViewInf => GetString("ChatWindow.ViewInf");
+
+        /// <summary>
+        /// Save chat history button
+        /// </summary>
+        public string L_Save => GetString("ChatWindow.Save");
         #endregion
 
-        public Chat()
+        public ChatWindow()
         {
             // Setup commands
             SendCommand = new DelegateCommand(parameter => !string.IsNullOrEmpty(MessageInput), parameter =>
@@ -69,6 +81,7 @@ namespace Chat.ViewModel
                         Subject = Subject.Msg,
                         Content = MessageInput
                     });
+                    s_Chats = Messages.ToList();
                     RaisePropertyChanged(nameof(Messages));
                 }
 
@@ -87,6 +100,26 @@ namespace Chat.ViewModel
             });
 
             ViewInfCommand = new DelegateCommand(parameter => new ShowInfDialog(App.HostLocalIP?.ToString() ?? "", App.Password).Show());
+
+            SaveChatCommand = new DelegateCommand(parameter =>
+            {
+                SaveFileDialog dialog = new SaveFileDialog
+                {
+                    Title = L_Save,
+                    CheckPathExists = true,
+                    FileName = DateTime.Now.ToShortDateString() + ".chat",
+                    Filter = GetString("Menu.HistoryFile")
+                };
+                if (dialog.ShowDialog() == true)
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(List<Message>));
+                    using (FileStream fls = new FileStream(dialog.FileName, FileMode.OpenOrCreate, FileAccess.Write))
+                    {
+                        fls.SetLength(0);
+                        serializer.Serialize(fls, s_Chats);
+                    }
+                }
+            });
 
             // Setup chat
             Com.MessageReceivedEventHandler += (sender, e) =>
@@ -180,6 +213,11 @@ namespace Chat.ViewModel
         /// View connection infos
         /// </summary>
         public DelegateCommand ViewInfCommand { get; }
+
+        /// <summary>
+        /// Save the current chat history
+        /// </summary>
+        public DelegateCommand SaveChatCommand { get; }
 
         // Data
         /// <summary>

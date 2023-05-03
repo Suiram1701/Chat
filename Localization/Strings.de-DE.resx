@@ -261,4 +261,16 @@
   <data name="ChatWindow.Leave" xml:space="preserve">
     <value>{0} hat den Chat verlassen</value>
   </data>
+  <data name="Menu.HistoryFile" xml:space="preserve">
+    <value>Chatverlauf Datei (*.chat)|*.chat</value>
+  </data>
+  <data name="Menu.SHFile" xml:space="preserve">
+    <value>Wählen Sie den gespeicherten Chatverlauf aus</value>
+  </data>
+  <data name="Menu.Err.NVFileTitle" xml:space="preserve">
+    <value>Ungültige Datei ausgewählt!</value>
+  </data>
+  <data name="Menu.Err.NVFile" xml:space="preserve">
+    <value>Die Datei {0} ist keine gültige Chatverlaufsdatei!</value>
+  </data>
 </root>

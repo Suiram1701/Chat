@@ -261,4 +261,16 @@
   <data name="ChatWindow.Leave" xml:space="preserve">
     <value>{0} left the chat</value>
   </data>
+  <data name="Menu.HistoryFile" xml:space="preserve">
+    <value>Chat history file (*.chat)|*.chat</value>
+  </data>
+  <data name="Menu.SHFile" xml:space="preserve">
+    <value>Select saved chat history</value>
+  </data>
+  <data name="Menu.Err.NVFileTitle" xml:space="preserve">
+    <value>Not valid file selected!</value>
+  </data>
+  <data name="Menu.Err.NVFile" xml:space="preserve">
+    <value>The file {0} isn't a valid chat history file!</value>
+  </data>
 </root>

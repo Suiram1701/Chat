@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:Chat="clr-namespace:Chat"
         xmlns:ViewModel="clr-namespace:Chat.ViewModel"
         xmlns:Model="clr-namespace:Chat.Model"
         xmlns:Convert="clr-namespace:Chat.Resources.Convert"
@@ -12,7 +11,7 @@
         Height="450" Width="800"
         MinHeight="450" MinWidth="800">
     <Window.DataContext>
-        <ViewModel:Chat/>
+        <ViewModel:ChatWindow/>
     </Window.DataContext>
     <Window.Resources>
         <Convert:SubtractConvert x:Key="Subtract"/>
@@ -46,6 +45,7 @@
         <StackPanel Orientation="Horizontal" Grid.Row="1" Background="#ebebeb">
             <Label Content="{Binding L_Users, Mode=OneTime}" FontSize="12" Height="25" Width="200"/>
             <Label Content="{Binding L_ChatHistory, Mode=OneTime}" FontSize="12" Height="25" Width="200"/>
+            <Button Content="{Binding L_Save, Mode=OneTime}" Command="{Binding SaveChatCommand, Mode=OneWay}" Height="20" Width="150" Margin="150,0,0,0"/>
         </StackPanel>
 
         <Grid Grid.Row="2" Background="#ededed">

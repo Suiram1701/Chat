@@ -392,7 +392,7 @@ namespace Chat.Commuication
                             Application.Current.Dispatcher.Invoke(() =>
                             {
                                 new Menu().Show();
-                                ChatWindow.Instance.Close();
+                                View.ChatWindow.Instance.Close();
                                 MessageBox.Show(message.Content?.ToString(), LangHelper.GetString("Com.Kicked"), MessageBoxButton.OK, MessageBoxImage.None);
                             });
                         }
@@ -474,7 +474,7 @@ namespace Chat.Commuication
                     Clients[sender].connection.Send(ipSyncBuffer, SocketFlags.None);
 
                     // Send all chat messages
-                    List<Message> messages = ViewModel.Chat.s_Chats.ToList();
+                    List<Message> messages = ViewModel.ChatWindow.s_Chats.ToList();
                     foreach (Message msg in messages)
                     {
                         // If system message edit it
@@ -486,7 +486,7 @@ namespace Chat.Commuication
                     }
 
                     // Sync users
-                    List<User> users = ViewModel.Chat.s_Users.ToList();
+                    List<User> users = ViewModel.ChatWindow.s_Users.ToList();
                     StringBuilder formatUsr = new StringBuilder();
                     foreach (User user in users)     // Format to string
                         formatUsr.Append(user.Name + "," + user.IP + " ");
