@@ -1,4 +1,10 @@
 ﻿using Chat.Commuication;
+using Chat.Model;
+using Chat.ViewModel;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -11,10 +17,21 @@ namespace Chat.View
     { 
         public static ChatWindow Instance { get; private set; }
 
-        public ChatWindow()
+        /// <summary>
+        /// New chat window
+        /// </summary>
+        /// <param name="messages">Saved chat</param>
+        public ChatWindow(IEnumerable<Message> messages = null)
         {
             InitializeComponent();
             Instance = this;
+
+            // Load saved history if it given
+            if (messages != null)
+            {
+                ((ViewModel.ChatWindow)DataContext).Messages = new ObservableCollection<Message>(messages);
+                ViewModel.ChatWindow.s_Chats = messages;
+            }
         }
 
         #region Window chrome

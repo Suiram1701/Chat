@@ -3,6 +3,7 @@ using Chat.Model;
 using Chat.View;
 using Localization;
 using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,7 +18,7 @@ using static Chat.Properties.Settings;
 
 namespace Chat.ViewModel
 {
-    internal class Menu : ViewModelBase
+    internal class MenuWindow : ViewModelBase
     {
         #region Localization
         public string L_Title =>
@@ -42,7 +43,7 @@ namespace Chat.ViewModel
             LangHelper.GetString("MenuWindow.IPadJoin");
         #endregion
 
-        public Menu()
+        public MenuWindow()
         {
             // Init commands
             StartChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)) && !HasError(nameof(Password)), parameter =>
@@ -51,7 +52,28 @@ namespace Chat.ViewModel
                 App.Password = Password;
                 App.IsHost = true;
                 Com.InitHost();
-                new View.ChatWindow().Show();
+
+                // Init saved chat history
+                if (!string.IsNullOrEmpty(SelectedFile))
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(List<Message>));
+                    List<Message> messages;
+                    using (StreamReader str = new StreamReader(SelectedFile))
+                        messages = (List<Message>)serializer.Deserialize(str);
+
+                    // Add system hint
+                    messages.Add(new Message()
+                    {
+                        Sender = "System",
+                        SendTime = DateTime.Now,
+                        Subject = Subject.Msg,
+                        Content = LangHelper.GetString("Menu.LoadH")
+                    });
+
+                    new View.ChatWindow(messages).Show();
+                }
+                else
+                    new View.ChatWindow().Show();
                 Application.Current.MainWindow.Close();
             });
 
@@ -88,7 +110,7 @@ namespace Chat.ViewModel
 
                     if (!fileSerializable)
                     {
-                        MessageBox.Show(LangHelper.GetString("Menu.Err.NVFile"), LangHelper.GetString("Menu.Err.NVFileTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show(LangHelper.GetString("Menu.Err.NVFile", fileName), LangHelper.GetString("Menu.Err.NVFileTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                         return;
                     }
                     else

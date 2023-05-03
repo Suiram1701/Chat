@@ -273,4 +273,7 @@
   <data name="Menu.Err.NVFile" xml:space="preserve">
     <value>The file {0} isn't a valid chat history file!</value>
   </data>
+  <data name="Menu.LoadH" xml:space="preserve">
+    <value>Saved chat history loaded!</value>
+  </data>
 </root>

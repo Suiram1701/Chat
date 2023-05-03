@@ -88,10 +88,10 @@
     <Compile Include="Extensions\MessageExtensions.cs" />
     <Compile Include="Model\User.cs" />
     <Compile Include="Resources\Convert\SubtractConvert.cs" />
-    <Compile Include="ViewModel\Chat.cs" />
+    <Compile Include="ViewModel\ChatWindow.cs" />
     <Compile Include="ViewModel\DelegateCommand.cs" />
     <Compile Include="Model\Message.cs" />
-    <Compile Include="ViewModel\Menu.cs" />
+    <Compile Include="ViewModel\MenuWindow.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="View\ChatWindow.xaml.cs">
       <DependentUpon>ChatWindow.xaml</DependentUpon>

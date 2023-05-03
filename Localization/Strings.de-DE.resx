@@ -271,6 +271,9 @@
     <value>Ungültige Datei ausgewählt!</value>
   </data>
   <data name="Menu.Err.NVFile" xml:space="preserve">
-    <value>Die Datei {0} ist keine gültige Chatverlaufsdatei!</value>
+    <value>Die Datei "{0}" ist keine gültige Chatverlaufsdatei!</value>
+  </data>
+  <data name="Menu.LoadH" xml:space="preserve">
+    <value>Gespeicherter Chatverlauf geladen!</value>
   </data>
 </root>
