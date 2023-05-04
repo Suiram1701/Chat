@@ -121,7 +121,7 @@
     <value>Ungültige IP Adresse</value>
   </data>
   <data name="App.NetConErr" xml:space="preserve">
-    <value>Netzwerk verbindungs Fehler</value>
+    <value>Netzwerk verbindungs Fehler!</value>
   </data>
   <data name="App.NetConTimeoutErr" xml:space="preserve">
     <value>Dein Netzwerk-Ping ist mit {0}ms (maximal {1}ms) zu hoch um diesen Chat zu nutzen!</value>

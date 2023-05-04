@@ -72,7 +72,7 @@
                             </Grid.ColumnDefinitions>
                             <Border Name="Border" CornerRadius="3" Grid.ColumnSpan="4"/>
                             <Label Content="{Binding Name}" Height="30" Width="180" Grid.Column="1" FontSize="13" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-                            <Button Name="KickBtn" Content="->" ToolTip="Kick user" Command="{Binding DataContext.KickUsrCommand, ElementName=window, Mode=OneWay}" CommandParameter="{Binding IP, Mode=OneTime}" Height="20" Width="20" Grid.Column="2" VerticalContentAlignment="Stretch"/>
+                            <Button Name="KickBtn" Content="->" ToolTip="Kick user" Command="{Binding DataContext.KickUsrCommand, ElementName=window, Mode=OneWay}" CommandParameter="{Binding IP, Mode=OneTime}" Height="20" Width="20" Grid.Column="2" VerticalContentAlignment="Stretch" IsCancel="False"/>
                         </Grid>
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding IsMouseOver, ElementName=Grid}" Value="true">

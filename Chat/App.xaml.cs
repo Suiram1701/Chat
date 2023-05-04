@@ -38,7 +38,7 @@ namespace Chat
         /// </summary>
         public static IPAddress HostLocalIP;
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             // Check if app is already running
             Process ownProcess = Process.GetCurrentProcess();
