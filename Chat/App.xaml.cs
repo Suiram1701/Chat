@@ -6,8 +6,6 @@ using System.Net;
 using Localization;
 using System.Linq;
 using System.Diagnostics;
-using System;
-using System.Text.RegularExpressions;
 using Chat.Commuication;
 using System.Net.Sockets;
 
@@ -40,7 +38,7 @@ namespace Chat
         /// </summary>
         public static IPAddress HostLocalIP;
 
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
             // Check if app is already running
             Process ownProcess = Process.GetCurrentProcess();
@@ -88,7 +86,7 @@ namespace Chat
             }
 
             // Get own local ip
-            LocalOwnIP = (await Dns.GetHostAddressesAsync(Dns.GetHostName())).FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork) ?? IPAddress.None;
+            LocalOwnIP = Dns.GetHostAddresses(Dns.GetHostName()).FirstOrDefault(ip => ip.AddressFamily == AddressFamily.InterNetwork) ?? IPAddress.None;
 
             base.OnStartup(e);
         }
