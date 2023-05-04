@@ -1,5 +1,4 @@
-﻿using Chat.Commuication;
-using System;
+﻿using System;
 using System.Xml.Serialization;
 
 namespace Chat.Model

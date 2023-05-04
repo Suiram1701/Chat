@@ -1,13 +1,13 @@
-﻿using System.Windows;
-using static Chat.Properties.Settings;
-using System.Security.Principal;
-using System.Net.NetworkInformation;
-using System.Net;
+﻿using Chat.Commuication;
 using Localization;
-using System.Linq;
 using System.Diagnostics;
-using Chat.Commuication;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Security.Principal;
+using System.Windows;
+using static Chat.Properties.Settings;
 
 namespace Chat
 {

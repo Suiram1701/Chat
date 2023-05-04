@@ -1,6 +1,5 @@
-﻿using Chat.ViewModel;
+﻿using Localization;
 using System.Windows;
-using Localization;
 
 namespace Chat.View
 {

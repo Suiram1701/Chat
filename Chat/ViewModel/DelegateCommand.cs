@@ -27,7 +27,7 @@ namespace Chat.ViewModel
         public DelegateCommand(Action<object> execute) : this(null, execute)
         {
         }
-        
+
         /// <summary>
         /// Define a command that run with a condition
         /// </summary>

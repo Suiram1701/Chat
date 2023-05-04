@@ -1,14 +1,12 @@
 ﻿using Chat.Commuication;
 using Chat.Model;
 using Chat.View;
-using Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Windows;
 using System.Xml.Serialization;
 using static Localization.LangHelper;
@@ -174,7 +172,7 @@ namespace Chat.ViewModel
                                 };
                             });
                             Users.Clear();
-                            foreach(User usr in Users)
+                            foreach (User usr in Users)
                                 Users.Add(usr);
                             break;
                     }

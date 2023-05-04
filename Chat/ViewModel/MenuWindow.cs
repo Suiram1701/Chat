@@ -1,18 +1,13 @@
 ﻿using Chat.Commuication;
 using Chat.Model;
-using Chat.View;
 using Localization;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
-using System.Security.RightsManagement;
 using System.Text;
 using System.Windows;
-using System.Windows.Documents;
-using System.Xml;
 using System.Xml.Serialization;
 using static Chat.Properties.Settings;
 
@@ -105,7 +100,7 @@ namespace Chat.ViewModel
                             stream.Dispose();
                             fileSerializable = false;
                         }
-                       
+
                     }
 
                     if (!fileSerializable)
@@ -120,7 +115,7 @@ namespace Chat.ViewModel
 
             NewHistoryCommand = new DelegateCommand(parameter => !string.IsNullOrEmpty(SelectedFile), parameter => SelectedFile = string.Empty);
 
-            JoinChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)) && !HasError(nameof(Password)) && !HasError(nameof(JoinIP)),parameter =>
+            JoinChatCommand = new DelegateCommand(parameter => !HasError(nameof(Nickname)) && !HasError(nameof(Password)) && !HasError(nameof(JoinIP)), parameter =>
             {
                 App.Nickname = Nickname;
                 App.Password = Password;

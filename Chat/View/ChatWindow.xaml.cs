@@ -1,10 +1,7 @@
 ﻿using Chat.Commuication;
 using Chat.Model;
-using Chat.ViewModel;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -14,7 +11,7 @@ namespace Chat.View
     /// Chat window
     /// </summary>
     public partial class ChatWindow : Window
-    { 
+    {
         public static ChatWindow Instance { get; private set; }
 
         /// <summary>

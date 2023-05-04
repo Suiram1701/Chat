@@ -1,21 +1,18 @@
 ﻿using Chat.Events;
+using Chat.Extensions;
+using Chat.Model;
+using Localization;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Windows;
-using static Chat.Properties.Settings;
-using Chat.Model;
-using Chat.Extensions;
-using System.IO;
-using System.Xml.Serialization;
-using Chat.View;
-using Localization;
-using Chat.ViewModel;
 using System.Text;
+using System.Windows;
+using System.Xml.Serialization;
+using static Chat.Properties.Settings;
 using Menu = Chat.View.Menu;
-using System.Threading.Tasks;
 
 namespace Chat.Commuication
 {
@@ -150,8 +147,8 @@ namespace Chat.Commuication
         {
             // Setup connection
             Socket socket;
-            try {socket = Connection?.EndAccept(ar) ?? null; }
-            catch {socket = null;}
+            try { socket = Connection?.EndAccept(ar) ?? null; }
+            catch { socket = null; }
             if (socket == null)
                 return;
 
@@ -223,7 +220,7 @@ namespace Chat.Commuication
                 catch { goto End; }
                 Clients[ipSender] = (msg.Sender, socket, Clients[ipSender].buffer);
             }
-            End:
+        End:
             Connection?.BeginAccept(new AsyncCallback(AcceptClient), Connection);
         }
 
@@ -325,7 +322,7 @@ namespace Chat.Commuication
         {
             string sender = ((IPEndPoint)((Socket)ar.AsyncState).RemoteEndPoint).Address.ToString();
             int bytes;
-            
+
             try { bytes = Connection?.EndReceive(ar) ?? 0; }
             catch { bytes = 0; }
 
@@ -378,7 +375,7 @@ namespace Chat.Commuication
                 }
             }
 
-            End:
+        End:
             Connection?.BeginReceive(_Receivebuffer, 0, _Receivebuffer.Length, SocketFlags.None, new AsyncCallback(ReceivingAsyncClient), Connection);
         }
 
